@@ -1,0 +1,126 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Czech resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CSY)
+#ifdef _WIN32
+LANGUAGE LANG_CZECH, SUBLANG_DEFAULT
+#pragma code_page(1250)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP2             BITMAP                  "Lightsmark2008.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG1 DIALOGEX 0, 0, 327, 162
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Lightsmark 2008 - Next Generation Lighting Benchmark"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "START BENCHMARK",IDC_START,230,122,90,14
+    CONTROL         122,IDC_STATIC,"Static",SS_BITMAP | SS_NOTIFY,7,7,213,148
+    PUSHBUTTON      "web",IDC_WEB,280,141,40,14
+    COMBOBOX        IDC_RESOLUTION,230,7,90,148,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Penumbra quality",IDC_STATIC2,230,21,90,8,NOT WS_VISIBLE
+    COMBOBOX        IDC_PENUMBRA,230,29,90,103,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    CONTROL         "",IDC_SCORE,"RichEdit20W",ES_CENTER | ES_AUTOHSCROLL | ES_READONLY | WS_TABSTOP,230,86,90,21,WS_EX_TRANSPARENT
+    CTEXT           "",IDC_STATIC3,230,107,90,8
+    PUSHBUTTON      "readme",IDC_README,230,141,40,14
+    CONTROL         "Editor",IDC_EDITOR,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,290,68,30,10
+    COMBOBOX        IDC_STABILITY,230,52,90,103,CBS_DROPDOWNLIST | NOT WS_VISIBLE | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Light stability",IDC_STATIC4,230,44,90,8,NOT WS_VISIBLE
+    CONTROL         "Music",IDC_MUSIC,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,259,68,29,10
+    CONTROL         "64bit",IDC_X64,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | WS_TABSTOP,230,68,28,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 320
+        VERTGUIDE, 230
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 155
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_MAIN_ICON           ICON                    "Lightsmark2008.ico"
+#endif    // Czech resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

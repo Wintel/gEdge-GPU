@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SCRIPTNAME=runcgl
+
+LOCATION=$(cd ${0%/*} && echo $PWD/${0##*/})
+DIR=`dirname "$LOCATION"`
+
+echo Using clusterGL from ${DIR}...
+for i in `seq 1 5`; do
+	ssh dn$i "cd ${DIR} && DISPLAY=:0 ./cgl-render dn$i > dn$i.log" &
+	echo "Launched dn$i"
+done
+sleep 2
+echo "Launching capture"
+DISPLAY=:0 LD_PRELOAD="${DIR}/libcgl-capture.so" $@
+
+#for i in `seq 1 5`; do
+#	ssh dn$i "killall -9 cgl-render"
+#done
