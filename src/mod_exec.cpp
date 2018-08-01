@@ -305,6 +305,7 @@ static void EXEC_glListBase(byte *commandbuf)
 //7
 static void EXEC_glBegin(byte *commandbuf)
 {
+	LOG("glBegin\n");
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	glBegin(*mode);
 }
@@ -322,6 +323,7 @@ static void EXEC_glBitmap(byte *commandbuf)
 
 	glBitmap(*width, *height, *xorig, *yorig, *xmove, *ymove, (const GLubyte *)popBuf());
 }
+
 
 
 //9
@@ -365,6 +367,7 @@ static void EXEC_glColor3dv(byte *commandbuf)
 //13
 static void EXEC_glColor3f(byte *commandbuf)
 {
+	LOG("glColor3f\n");
 	GLfloat *red = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
 	GLfloat *green = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *blue = (GLfloat*)commandbuf;    commandbuf += sizeof(GLfloat);
@@ -1467,6 +1470,7 @@ static void EXEC_glVertex2fv(byte *commandbuf)
 //130
 static void EXEC_glVertex2i(byte *commandbuf)
 {
+	LOG("glVertex2i\n");
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -2208,6 +2212,7 @@ static void EXEC_glDrawBuffer(byte *commandbuf)
 //203
 static void EXEC_glClear(byte *commandbuf)
 {
+	printf("glClear\n");
 	GLbitfield *mask = (GLbitfield*)commandbuf;  commandbuf += sizeof(GLbitfield);
 
 	glClear(*mask);
@@ -2344,7 +2349,7 @@ static void EXEC_glFinish(byte *commandbuf)
 //217
 static void EXEC_glFlush(byte *commandbuf)
 {
-
+    LOG("glFlush\n");
 	glFlush();
 }
 
@@ -2635,7 +2640,8 @@ static void EXEC_glStencilOp(byte *commandbuf)
 	GLenum *fail = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *zfail = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *zpass = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
-
+    
+	LOG("glStencilOp %d, %d, %d\n", *fail, *zfail, *zpass);
 	glStencilOp(*fail, *zfail, *zpass);
 }
 
@@ -3085,7 +3091,7 @@ static void EXEC_glFrustum(byte *commandbuf)
 	GLdouble *top = (GLdouble*)commandbuf;   commandbuf += sizeof(GLdouble);
 	GLdouble *zNear = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *zFar = (GLdouble*)commandbuf;  commandbuf += sizeof(GLdouble);
-	LOG("called glFrustum, panic!!!!\n");
+	//LOG("called glFrustum, panic!!!!\n");
 	glFrustum(*left, *right, *bottom, *top, *zNear, *zFar);
 }
 

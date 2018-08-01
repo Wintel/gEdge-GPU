@@ -12,7 +12,7 @@ uint32_t bytesLeft = SEND_BUFFER_SIZE;
 
 //big buffer to store instructions before sending
 byte mSendBuf[SEND_BUFFER_SIZE];
-
+extern  App *theApp;
 int totalSent;
 
 /*******************************************************************************
@@ -29,8 +29,9 @@ NetClientModule::NetClientModule()
 		hints.ai_socktype = SOCK_STREAM;
 		
 		string addr = gConfig->outputAddresses[i];
-		int port = gConfig->outputPorts[i];
+		int port =theApp->portNum[i];
 		
+		LOG("port number: %d\n",port);
 		getaddrinfo(addr.c_str(), toString(port).c_str(), &hints, &res);
 		
 		int s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
@@ -47,14 +48,15 @@ NetClientModule::NetClientModule()
 		setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
 				
 		struct sockaddr_in mAddr; 
-
-		int c = connect(s, res->ai_addr, res->ai_addrlen);
-
+        
+		//int c = connect(s, res->ai_addr, res->ai_addrlen);
+        while(connect(s, res->ai_addr, res->ai_addrlen)<0);
+	   /* LOG("connection result %d\n",c);
 	    if(c < 0) {
 			LOG("Failed to connect with server '%s:%d' - error %s\n", 
 					addr.c_str(), port, strerror( errno ));
 			exit(1);
-		}
+		}*/
 		LOG("Connected to remote pipeline on %s:%d\n", addr.c_str(), port);	
 	
 		mSockets.push_back(s);
@@ -128,10 +130,12 @@ bool NetClientModule::process(vector<Instruction *> *list)
 				if(i->buffers[n].needReply) {
 
 					sendBuffer();
-					if(int x = internalRead(i->buffers[n].buffer, l) != l) {
+					int x=internalRead(i->buffers[n].buffer, l);
+					if(x!= l) {
 						LOG("Connection problem: NetClient (didn't recv buffer %d got: %d)!\n", l, x);
 						return false;
 					}
+					LOG("recv buffer %d and %d\n",l,x);
 					//LOG("got buffer back!\n");
 				}
 			}

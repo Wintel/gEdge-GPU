@@ -10,6 +10,10 @@ uint32_t iRecieveBufPos = 0;
 uint32_t bytesRemaining = 0;
 
 int totalRead = 0;
+int connection = 0;
+
+//extern App *theApp;
+//extern NetSrvModule* netserver;
 
 //big buffers
 static byte mRecieveBuf[recieveBufferSize];
@@ -20,7 +24,7 @@ static int iInstructionCount = 0;
 	Net Server Module
 *********************************************************/
 
-NetSrvModule::NetSrvModule()
+NetSrvModule::NetSrvModule(int port)
 {
 
 	if ((mSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
@@ -34,7 +38,7 @@ NetSrvModule::NetSrvModule()
 	memset(&addr, 0, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(gConfig->serverPort);
+	addr.sin_port = htons(port);
 
 	//set TCP options
 	int one = 1;
@@ -53,17 +57,50 @@ NetSrvModule::NetSrvModule()
 		exit(1);
 	}
 	
-	LOG("Waiting for connection on port %d\n", gConfig->serverPort);
+	LOG("Waiting for connection on port %d\n", port);
 
 	unsigned int clientlen = sizeof(clientaddr);
-	int client = 0;
+	int client = 0, pid;
 	// Wait for client connection
-	if ((client = accept(mSocket, (struct sockaddr *) &clientaddr, &clientlen)) < 0) {
+//	while(1)
+//	{
+	  if ((client = accept(mSocket, (struct sockaddr *) &clientaddr, &clientlen)) < 0) {
 		LOG("Failed to accept client connection\n");
 		exit(1);
-	}
-	mClientSocket = new BufferedFd(client);
-	LOG("%s connected\n", string(inet_ntoa(clientaddr.sin_addr)).c_str() );
+	  }
+	 
+	 // pid = fork();
+     // if (pid < 0) 
+	 // {
+     //   LOG("ERROR in new process creation");
+     // }
+	 // if(pid==0)
+	  { 
+		  mClientSocket = new BufferedFd(client);
+	      LOG("%s connected\n", string(inet_ntoa(clientaddr.sin_addr)).c_str() );
+		  //close(mSocket);
+		//theApp->mModules.push_back(netserver);
+		
+		// theApp->mModules.push_back(netserver);
+		// theApp->mModules.push_back(new DeltaDecodeModule()); 	
+	//mModules.push_back(new DuplicateBufferDecodeModule());
+	    // theApp->mModules.push_back(new ExecModule());
+	    // while( theApp->tick() ){ 
+		//run tick() until we decide to bail
+	     //   }
+	     //theApp->mModules.push_back(new DeltaDecodeModule()); 	
+	      //mModules.push_back(new DuplicateBufferDecodeModule());
+	     //theApp->mModules.push_back(new ExecModule());
+		 
+		 // close(client);
+		  
+		  
+	  }
+	//  else {
+             //parent process
+    //         close(client);
+    //      }
+//	}
 }
 
 
@@ -78,6 +115,7 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 	uint32_t num = 0;
 	
 	iInstructionCount = 0;
+	LOG("NetSrvModule process\n");
 
 	int len = internalRead((byte *)&num, sizeof(uint32_t));
 	if(len != sizeof(uint32_t) ) {
@@ -85,7 +123,7 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 		return false;
 	}
 	
-	//LOG("Reading %d instructions\n", num);
+	
 
 	for(uint32_t x=0;x<num;x++) {
 		Instruction *i = &mInstructions[iInstructionCount++];

@@ -20,6 +20,7 @@
 #include "lru_cache.h"
 #include "module.h"
 #include "mongoose.h"
+#include <pthread.h>
 
 
 /*******************************************************************************
@@ -38,7 +39,7 @@ public:
 *******************************************************************************/
 class App
 {
-	vector<Module *> mModules;
+	
 	
 	void init(bool shared, const char *id);
 	
@@ -49,6 +50,8 @@ public:
 
 	//called when we're invoked from the command line
 	int run(int argc, char **argv);
+	vector<Module *> mModules;
+	vector<int> portNum;
 
 	//called when we're invoked from LD_PRELOAD
 	//Will return false if we're not configured to run off this source
@@ -64,6 +67,8 @@ extern bool bIsIntercept;
 
 //Global config instance
 extern Config *gConfig;
+
+//App *theApp = NULL;
 
 //mod_text
 void LOG_INSTRUCTION(Instruction *instr);

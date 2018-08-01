@@ -90,7 +90,7 @@ class NetSrvModule : public Module
     void recieveBuffer(void);
 	
 public:
-	NetSrvModule();
+	NetSrvModule(int port);
 
 	bool process(vector<Instruction *> *i);
 	void reply(Instruction *instr, int i);
@@ -106,6 +106,7 @@ public:
 class NetClientModule : public Module
 {
     vector<int> mSockets;
+	
     int numConnections;
     
     int internalWrite(void* buf, int nByte);

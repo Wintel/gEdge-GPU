@@ -691,6 +691,7 @@ extern "C" void glListBase(GLuint base){
 
 //7
 extern "C" void glBegin(GLenum mode){
+	LOG("glBegin\n");
 	pushOp(7);
 	pushParam(mode);
 }
@@ -738,6 +739,7 @@ extern "C" void glColor3dv(const GLdouble * v){
 
 //13
 extern "C" void glColor3f(GLfloat red, GLfloat green, GLfloat blue){
+	LOG("glColor3f\n");
 	pushOp(13);
 	pushParam(red);
 	pushParam(green);
@@ -1553,6 +1555,7 @@ extern "C" void glVertex2fv(const GLfloat * v){
 
 //130
 extern "C" void glVertex2i(GLint x, GLint y){
+    LOG("glVertex2i\n");
 	pushOp(130);
 	pushParam(x);
 	pushParam(y);
@@ -2142,6 +2145,7 @@ extern "C" void glDrawBuffer(GLenum mode){
 
 //203
 extern "C" void glClear(GLbitfield mask){
+	LOG("glClear\n");
 	pushOp(203);
 	pushParam(mask);
 }
@@ -2240,7 +2244,7 @@ extern "C" void glFinish(){
 //217
 extern "C" void glFlush(){
 	pushOp(217);
-//	waitForReturn();
+	waitForReturn();
 }
 
 //218
@@ -2459,6 +2463,7 @@ extern "C" void glStencilFunc(GLenum func, GLint ref, GLuint mask){
 
 //244
 extern "C" void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass){
+	LOG("glStencilOp %d, %d, %d\n", fail, zfail, zpass);
 	pushOp(244);
 	pushParam(fail);
 	pushParam(zfail);
