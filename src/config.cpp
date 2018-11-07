@@ -29,20 +29,20 @@ Config::Config(string filename, string id){
 	
 	//Top level options
 	static cfg_opt_t opts[] = {
-		CFG_SIMPLE_INT(	(char *)("totalWidth"), 	&totalWidth),
-		CFG_SIMPLE_INT(	(char *)("totalHeight"), &totalHeight),
-		CFG_SIMPLE_INT(	(char *)("fakeWindowX"), &fakeWindowX),
-		CFG_SIMPLE_INT(	(char *)("fakeWindowY"), &fakeWindowY),
-		CFG_SIMPLE_INT(	(char *)("syncRate"), &syncRate),
-		CFG_SIMPLE_INT(	(char *)("networkCompression"), &networkCompression),
-		CFG_SIMPLE_BOOL(	(char *)("enableStats"),	 &enableStats),
+		CFG_SIMPLE_INT(	(char *)("totalWidth"), 	(long int*)&totalWidth),
+		CFG_SIMPLE_INT(	(char *)("totalHeight"), (long int*)&totalHeight),
+		CFG_SIMPLE_INT(	(char *)("fakeWindowX"), (long int*)&fakeWindowX),
+		CFG_SIMPLE_INT(	(char *)("fakeWindowY"), (long int*)&fakeWindowY),
+		CFG_SIMPLE_INT(	(char *)("syncRate"), (long int*)&syncRate),
+		CFG_SIMPLE_INT(	(char *)("networkCompression"), (long int*)&networkCompression),
+		CFG_SIMPLE_BOOL(	(char *)("enableStats"),	 (cfg_bool_t*)&enableStats),
 		CFG_STR_LIST( (char *)"capturePipeline", (char *)"{}", CFGF_NONE),
 		CFG_STR_LIST( (char *)"outputPipeline", (char *)"{}", CFGF_NONE),
 		CFG_SEC(	 (char *)"output", 	output_opts, CFGF_MULTI | CFGF_TITLE),
 		CFG_STR(	 (char *)("interceptMode"), 0, CFGF_NONE),
 		CFG_STR(	 (char *)("capturePidFile"), 0, CFGF_NONE),
 		CFG_SIMPLE_BOOL(	(char *)("remoteConfigServerEnabled"),	 
-			&remoteConfigServerEnabled),
+			 (cfg_bool_t*)&remoteConfigServerEnabled),
 		CFG_END()
 	};
 	
@@ -79,6 +79,7 @@ Config::Config(string filename, string id){
 	
 	int n = cfg_size(cfg, "output");
 	
+    printf("number of outputs: %d\n",n);
 	if(n == 0){
 		LOG("No outputs specified, aborting\n");
 		exit(1);
@@ -97,9 +98,10 @@ Config::Config(string filename, string id){
 		outputAddresses.push_back(string(addr));
 		outputPorts.push_back(port);
 		
-		if(id != cfg_title(o)){
+		//LOG("id is %s and title is %s\n",id.c_str(),cfg_title(o));
+	/*	if(id != cfg_title(o)){
 			continue;
-		}
+		}*/
 		
 		found_section = true;
 	
@@ -132,8 +134,9 @@ Config::Config(string filename, string id){
 		exit(1);
 	}
 	
-	cfg_free(cfg);
 
+	cfg_free(cfg);
+     
 	if(remoteConfigServerEnabled){
 		startRemoteConfigServer();
 	}

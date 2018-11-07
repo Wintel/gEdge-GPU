@@ -152,7 +152,7 @@ bool App::run_shared(string src)
 		fwrite(pid, strlen(pid), 1, f);
 		fclose(f);
 	}
-
+    
 	for(int i=0;i<gConfig->numOutputs;i++){
 		
 		struct addrinfo hints, *res;
@@ -161,8 +161,8 @@ bool App::run_shared(string src)
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		
-		string addr = gConfig->outputAddresses[0];
-		int port = gConfig->outputPorts[0];
+		string addr = gConfig->outputAddresses[i];
+		int port = gConfig->outputPorts[i];
 		
 		getaddrinfo(addr.c_str(), toString(port).c_str(), &hints, &res);
 		
@@ -171,8 +171,7 @@ bool App::run_shared(string src)
 		if(s == 0){
 			LOG("Couldn't make socket!\n");
 			exit(1) ;
-		}
-				
+		}	
 		//set TCP options 
 		int one = 1;
 
@@ -185,16 +184,22 @@ bool App::run_shared(string src)
 
 		bzero(buffer,256);
         
-		LOG("connection %d\n",c);
+		//LOG("connection %d\n",c);
 	    if(c < 0) {
 			LOG("Failed to connect with server '%s:%d' - error %s\n", 
 					addr.c_str(), port, strerror( errno ));
-			exit(1);
+			//exit(1);
+			portNum.push_back(0);
+			continue;
 		}
-
+        
+		LOG("address:%s, port number:%d\n",addr.c_str(),port);
         n = read(s,buffer,255);
         if (n < 0) 
+		{
          LOG("ERROR reading from socket");
+		 continue;
+		}
         int portno = atoi(buffer);
 		LOG("port number %d\n",portno);
 		portNum.push_back(portno);

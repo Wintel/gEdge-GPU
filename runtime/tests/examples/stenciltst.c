@@ -84,7 +84,7 @@ Draw(void)
   glEnd();
 
   glStencilFunc(GL_EQUAL, 1, 1);
-  glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 
   /* blue square */
   glColor3ub(0, 0, 200);
@@ -141,6 +141,7 @@ main(int argc, char **argv)
   glMatrixMode(GL_MODELVIEW);
 
   glutKeyboardFunc(Key);
+  for(int i=0 ;i<3;i++)
   glutDisplayFunc(Draw);
   glutMainLoop();
   return 0;             /* ANSI C requires main to return int. */

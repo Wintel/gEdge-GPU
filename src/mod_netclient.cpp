@@ -31,7 +31,7 @@ NetClientModule::NetClientModule()
 		string addr = gConfig->outputAddresses[i];
 		int port =theApp->portNum[i];
 		
-		LOG("port number: %d\n",port);
+		LOG("port number: %d,ip address: %s\n",port,gConfig->outputAddresses[i].c_str());
 		getaddrinfo(addr.c_str(), toString(port).c_str(), &hints, &res);
 		
 		int s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
@@ -49,14 +49,15 @@ NetClientModule::NetClientModule()
 				
 		struct sockaddr_in mAddr; 
         
-		//int c = connect(s, res->ai_addr, res->ai_addrlen);
+	//	int c = connect(s, res->ai_addr, res->ai_addrlen);
         while(connect(s, res->ai_addr, res->ai_addrlen)<0);
-	   /* LOG("connection result %d\n",c);
-	    if(c < 0) {
-			LOG("Failed to connect with server '%s:%d' - error %s\n", 
-					addr.c_str(), port, strerror( errno ));
-			exit(1);
-		}*/
+	//    LOG("connection result %d\n",c);
+	//    if(c < 0) {
+	//		LOG("Failed to connect with server '%s:%d' - error %s\n", 
+	//				addr.c_str(), port, strerror( errno ));
+			//exit(1);
+	//		continue;
+	//	}
 		LOG("Connected to remote pipeline on %s:%d\n", addr.c_str(), port);	
 	
 		mSockets.push_back(s);
@@ -117,6 +118,7 @@ bool NetClientModule::process(vector<Instruction *> *list)
 		}
 
 		//Now see if we need to send any buffers
+
 		for(int n=0;n<3;n++) {
 			int l = i->buffers[n].len;
 
@@ -132,7 +134,7 @@ bool NetClientModule::process(vector<Instruction *> *list)
 					sendBuffer();
 					int x=internalRead(i->buffers[n].buffer, l);
 					if(x!= l) {
-						LOG("Connection problem: NetClient (didn't recv buffer %d got: %d)!\n", l, x);
+						LOG("Connection problem: NetClient (didn't recv buffer %d got: %d, instruction: %d)!\n", l, x, i->id);
 						return false;
 					}
 					LOG("recv buffer %d and %d\n",l,x);

@@ -11,6 +11,12 @@
 
 #include <GL/glew.h>
 
+#include <fcntl.h>
+#include <unistd.h>
+#include <pthread.h>
+#include <string>
+#define PORT 8080
+
 typedef void (*ExecFunc)(byte *buf);
 
 /*******************************************************************************
@@ -26,6 +32,119 @@ int currentBuffer = 0;
 bool glFrustumUsage = true;
 bool bezelCompensation = true;
 
+
+/*******************************************************************************
+	send photos
+*******************************************************************************/
+
+int send_image(int socket){
+
+   FILE *picture;
+   static int frameid=0;
+   int size, read_size, stat, packet_index;
+   char send_buffer[10240], read_buffer[256];
+   packet_index = 1;
+
+   char filename_next[256];
+   char filename[256];
+   snprintf(filename,256,"%s%d.bmp","tmp",frameid);
+   snprintf(filename_next,256,"%s%d.bmp","tmp",frameid+1);
+   picture = fopen(filename_next, "r");
+
+   while(picture == NULL) {
+	    picture = fopen(filename_next, "r");
+	} 
+ 
+   picture = fopen(filename, "r");
+   while(!feof(picture)) {
+   //while(packet_index = 1){
+      //Read from the file into our send buffer
+      read_size = fread(send_buffer, 1, sizeof(send_buffer)-1, picture);
+
+      //Send data through our socket 
+      do{
+        stat = write(socket, send_buffer, read_size);  
+      }while (stat < 0);
+
+      printf("Packet Number: %i\n",packet_index);
+      printf("Packet Size Sent: %i\n",read_size);     
+      printf(" \n");
+      printf(" \n");
+
+
+      packet_index++;  
+
+      //Zero out our send buffer
+      bzero(send_buffer, sizeof(send_buffer));
+     }
+	 frameid++;
+	 fclose(picture);
+    }
+
+
+void * pthread_socket(void *threadid) {
+	struct sockaddr_in address;
+    int size,sock = 0, valread, new_socket,stat;
+    struct sockaddr_in serv_addr;
+	FILE* picture;
+     char buffer[1024] = {0}, read_buffer[256];
+    int i=0;
+    memset(&serv_addr, '0', sizeof(serv_addr));
+  
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(PORT);
+     if(inet_pton(AF_INET, "10.0.1.26", &serv_addr.sin_addr)<=0) 
+    {
+        printf("\nInvalid address/ Address not supported \n");
+        return 0;
+    }
+    
+     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
+     {
+        printf("\n Socket creation error \n");
+        return 0;
+     } 
+      
+    // Convert IPv4 and IPv6 addresses from text to binary form
+  
+     if ((new_socket=connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
+     {
+        printf("\nConnection Failed \n");
+        return 0;
+     }
+
+     while(picture==NULL)
+	  picture = fopen("tmp1.bmp", "r");
+     picture = fopen("tmp0.bmp", "r");
+     fseek(picture, 0, SEEK_END);
+     size = ftell(picture);
+     fseek(picture, 0, SEEK_SET);
+     printf("Total Picture size: %i\n",size);
+
+     //Send Picture Size
+     printf("Sending Picture Size\n");
+     write(sock, (void *)&size, sizeof(int));
+
+   //Send Picture as Byte Array
+    printf("Sending Picture as Byte Array\n");
+
+    do { 
+      stat=read(sock, &read_buffer , 255);
+    } while (stat < 0);
+    
+	 while(1)
+    {
+     printf("finished%d\n",i);
+    send_image(sock);
+  //  i++;
+    //sleep(1);
+   }
+    //if ( shutdown( new_socket, SHUT_WR ) == -1 ) err( "socket shutdown failed" );
+	close(sock);
+	pthread_exit(NULL);
+}
+
+
 /*******************************************************************************
 	Module
 *******************************************************************************/
@@ -39,6 +158,17 @@ ExecModule::ExecModule()
 		LOG("failed to make window!\n");
 		exit(1);
 	}
+
+
+
+	pthread_t tid;
+	int rc;
+
+	/*rc = pthread_create(&tid , NULL, pthread_socket, (void *)0);
+	if (rc){
+		printf("ERROR; return code from pthread_create() is %d\n", rc);
+		exit(-1);
+	}*/
 }
 
 
@@ -162,6 +292,7 @@ bool ExecModule::sync()
 byte *popBuf()
 {
 	currentBuffer++;
+	//cout<<currentBuffer<<endl;
 	return mCurrentInstruction->buffers[currentBuffer-1].buffer;
 }
 
@@ -211,6 +342,61 @@ void pushRet(const GLchar * val)
 	mCurrentInstruction->buffers[currentBuffer].needReply = true;
 }
 
+static void create_ppm(char *prefix, int frame_id, unsigned int width, unsigned int height,
+        unsigned int color_max, unsigned int pixel_nbytes, GLubyte *pixels) {
+    enum Constants { max_filename = 256 };
+    char filename[max_filename];
+    snprintf(filename, max_filename, "%s%d.bmp", prefix, frame_id);
+    unsigned char bmp_file_header[14] = { 'B', 'M', 0, 0, 0, 0, 0, 0, 0, 0, 54, 0, 0, 0, };
+	unsigned char bmp_info_header[40] = { 40, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 24, 0, };
+	unsigned char bmp_pad[3] = { 0, 0, 0 };
+
+	const int size = 54 + width * height * pixel_nbytes;
+
+	bmp_file_header[2] = (unsigned char)size;
+	bmp_file_header[3] = (unsigned char)(size >> 8);
+	bmp_file_header[4] = (unsigned char)(size >> 16);
+	bmp_file_header[5] = (unsigned char)(size >> 24);
+
+	bmp_info_header[4] = (unsigned char)(width);
+	bmp_info_header[5] = (unsigned char)(width >> 8);
+	bmp_info_header[6] = (unsigned char)(width >> 16);
+	bmp_info_header[7] = (unsigned char)(width >> 24);
+
+	bmp_info_header[8] = (unsigned char)(height);
+	bmp_info_header[9] = (unsigned char)(height >> 8);
+	bmp_info_header[10] = (unsigned char)(height >> 16);
+        bmp_info_header[11] = (unsigned char)(height >> 24);
+        FILE *f = fopen(filename, "wb");
+        if (f)
+	{
+		fwrite(bmp_file_header, 1, 14, f);
+		fwrite(bmp_info_header, 1, 40, f);
+
+		for (int i = 0; i < height; i++)
+		// for (int i = (height - 1); i >= 0; i--)
+		{
+			fwrite(pixels + (width * i * 3), 3, width, f);
+			fwrite(bmp_pad, 1, ((4 - (width * 3) % 4) % 4), f);
+		}
+		fclose(f);
+	}
+
+       if(frame_id>=1000)
+    {
+    
+	}
+        return;
+}
+
+
+
+//217
+static void EXEC_glFlush(byte *commandbuf)
+{
+
+	glFlush();
+}
 
 /*******************************************************************************
 	CGL special functions
@@ -219,10 +405,10 @@ void pushRet(const GLchar * val)
 //1499
 static void EXEC_CGLSwapBuffers(byte *commandbuf)
 {
-	LOG("Swap!\n");
+	//printf("SWAP\n");
 	SDL_GL_SwapBuffers();
-	
 	Stats::increment("Rendered frames");
+	//EXEC_glFlush(commandbuf);
 }
 
 
@@ -282,7 +468,6 @@ static void EXEC_glDeleteLists(byte *commandbuf)
 //5
 static void EXEC_glGenLists(byte *commandbuf)
 {
-	LOG("glGenLists\n");
 	GLsizei *range = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	
 	GLint r = glGenLists(*range);
@@ -305,7 +490,6 @@ static void EXEC_glListBase(byte *commandbuf)
 //7
 static void EXEC_glBegin(byte *commandbuf)
 {
-	LOG("glBegin\n");
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	glBegin(*mode);
 }
@@ -323,7 +507,6 @@ static void EXEC_glBitmap(byte *commandbuf)
 
 	glBitmap(*width, *height, *xorig, *yorig, *xmove, *ymove, (const GLubyte *)popBuf());
 }
-
 
 
 //9
@@ -367,7 +550,6 @@ static void EXEC_glColor3dv(byte *commandbuf)
 //13
 static void EXEC_glColor3f(byte *commandbuf)
 {
-	LOG("glColor3f\n");
 	GLfloat *red = (GLfloat*)commandbuf;     commandbuf += sizeof(GLfloat);
 	GLfloat *green = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *blue = (GLfloat*)commandbuf;    commandbuf += sizeof(GLfloat);
@@ -659,7 +841,7 @@ static void EXEC_glEdgeFlagv(byte *commandbuf)
 //43
 static void EXEC_glEnd(byte *commandbuf)
 {
-    LOG("glEnd\n");
+
 	glEnd();
 }
 
@@ -773,7 +955,6 @@ static void EXEC_glNormal3dv(byte *commandbuf)
 //56
 static void EXEC_glNormal3f(byte *commandbuf)
 {
-	LOG("glNormal3f\n");
 	GLfloat *nx = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *ny = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
 	GLfloat *nz = (GLfloat*)commandbuf;  commandbuf += sizeof(GLfloat);
@@ -1470,7 +1651,6 @@ static void EXEC_glVertex2fv(byte *commandbuf)
 //130
 static void EXEC_glVertex2i(byte *commandbuf)
 {
-	LOG("glVertex2i\n");
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 
@@ -1526,7 +1706,6 @@ static void EXEC_glVertex3dv(byte *commandbuf)
 //136
 static void EXEC_glVertex3f(byte *commandbuf)
 {
-	LOG("glVertex3f\n");
 	GLfloat *x = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *y = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
 	GLfloat *z = (GLfloat*)commandbuf;   commandbuf += sizeof(GLfloat);
@@ -1759,7 +1938,6 @@ static void EXEC_glLightf(byte *commandbuf)
 //160
 static void EXEC_glLightfv(byte *commandbuf)
 {
-	LOG("glLightfv\n");
 	GLenum *light = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *pname = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 
@@ -1865,7 +2043,7 @@ static void EXEC_glMaterialfv(byte *commandbuf)
 	int i =0;
 	glMaterialfv(*face, *pname, (const GLfloat *)popBuf(&i));
 	
-	LOG("glMaterialfv: %d\n", i);
+	//LOG("glMaterialfv: %d\n", i);
 }
 
 
@@ -1932,7 +2110,6 @@ static void EXEC_glScissor(byte *commandbuf)
 //177
 static void EXEC_glShadeModel(byte *commandbuf)
 {
-	LOG("glShadeModel\n");
 	GLenum *mode = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 
 	glShadeModel(*mode);
@@ -2212,7 +2389,6 @@ static void EXEC_glDrawBuffer(byte *commandbuf)
 //203
 static void EXEC_glClear(byte *commandbuf)
 {
-	printf("glClear\n");
 	GLbitfield *mask = (GLbitfield*)commandbuf;  commandbuf += sizeof(GLbitfield);
 
 	glClear(*mask);
@@ -2331,7 +2507,6 @@ static void EXEC_glDisable(byte *commandbuf)
 //215
 static void EXEC_glEnable(byte *commandbuf)
 {
-	LOG("glEnable\n");
 	GLenum *cap = (GLenum*)commandbuf;   commandbuf += sizeof(GLenum);
 
 	glEnable(*cap);
@@ -2346,12 +2521,7 @@ static void EXEC_glFinish(byte *commandbuf)
 }
 
 
-//217
-static void EXEC_glFlush(byte *commandbuf)
-{
-    LOG("glFlush\n");
-	glFlush();
-}
+
 
 
 //218
@@ -2640,8 +2810,7 @@ static void EXEC_glStencilOp(byte *commandbuf)
 	GLenum *fail = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	GLenum *zfail = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
 	GLenum *zpass = (GLenum*)commandbuf;     commandbuf += sizeof(GLenum);
-    
-	LOG("glStencilOp %d, %d, %d\n", *fail, *zfail, *zpass);
+
 	glStencilOp(*fail, *zfail, *zpass);
 }
 
@@ -2760,14 +2929,21 @@ static void EXEC_glCopyPixels(byte *commandbuf)
 //256
 static void EXEC_glReadPixels(byte *commandbuf)
 {
+	static int nscreenshots = 0;
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLsizei *width = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	GLsizei *height = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
+	//LOG("glReadPixels %d %d %d %d %d %d\n", *x, *y, *width, *height,*format,*type);
+	GLubyte * pixel_data = (GLubyte*)popBuf();
+	glReadPixels(*x, *y, *width, *height, GL_BGR, *type, (GLvoid *)pixel_data);
+    create_ppm("tmp", nscreenshots, *width, *height, 255, 3, pixel_data);
 
-	glReadPixels(*x, *y, *width, *height, *format, *type, (GLvoid *)popBuf());
+
+	nscreenshots++;
+	//cout<<"glReadPixels\n"<<endl;
 }
 
 
@@ -3003,6 +3179,7 @@ static void EXEC_glGetTexGeniv(byte *commandbuf)
 //281
 static void EXEC_glGetTexImage(byte *commandbuf)
 {
+	//cout<<"glGetTexImage "<<endl;
 	GLenum *target = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
 	GLint *level = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLenum *format = (GLenum*)commandbuf;    commandbuf += sizeof(GLenum);
@@ -3091,7 +3268,7 @@ static void EXEC_glFrustum(byte *commandbuf)
 	GLdouble *top = (GLdouble*)commandbuf;   commandbuf += sizeof(GLdouble);
 	GLdouble *zNear = (GLdouble*)commandbuf;     commandbuf += sizeof(GLdouble);
 	GLdouble *zFar = (GLdouble*)commandbuf;  commandbuf += sizeof(GLdouble);
-	//LOG("called glFrustum, panic!!!!\n");
+	LOG("called glFrustum, panic!!!!\n");
 	glFrustum(*left, *right, *bottom, *top, *zNear, *zFar);
 }
 
@@ -3246,12 +3423,14 @@ static void EXEC_glTranslatef(byte *commandbuf)
 //305
 static void EXEC_glViewport(byte *commandbuf)
 {
+	//printf("How are you!!!!!");
 	GLint *x = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLint *y = (GLint*)commandbuf;   commandbuf += sizeof(GLint);
 	GLsizei *width = (GLsizei*)commandbuf;   commandbuf += sizeof(GLsizei);
 	GLsizei *height = (GLsizei*)commandbuf;  commandbuf += sizeof(GLsizei);
 
 	glViewport(*x, *y, *width, *height);
+	//LOG("glViewport %d %d %d %d\n", *x, *y, *width, *height);
 }
 
 
@@ -13542,7 +13721,6 @@ static void EXEC_glXCopyContext(byte *commandbuf)
 //1606
 static void EXEC_glXSwapBuffers(byte *commandbuf)
 {
-	LOG("glXSwapBuffers\n");
 	LOG("Called unimplemted stub glXSwapBuffers!\n");
 	//( Display *dpy, GLXDrawable drawable )
 }
@@ -15342,6 +15520,8 @@ bool ExecModule::init()
 	mFunctions[1654] = EXEC_glXGetSwapIntervalMESA;
 	mFunctions[1655] = EXEC_glXBindTexImageEXT;
 	mFunctions[1656] = EXEC_glXReleaseTexImageEXT;
+
+	
 
 	LOG("Loaded!\n");
 

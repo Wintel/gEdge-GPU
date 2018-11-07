@@ -1,5 +1,6 @@
 /*******************************************************************************
 	ClusterGL - Application intercept module
+	This module is used to intercept opengl command and sent them to server
 *******************************************************************************/
 
 #include "main.h"
@@ -11,8 +12,6 @@
 //#define  GLUFULL
 
 extern App *theApp;
-
-
 /*********************************************************
 	Pointer Structures
 *********************************************************/
@@ -147,7 +146,7 @@ bool AppModule::sync(){
 /*********************************************************
 	Interception Global Functions
 *********************************************************/
-
+//This function is used to push command parameters into a certain buffer. 
 void pushOp(uint16_t opID){
 
 	if(iInstructionCount >= MAX_INSTRUCTIONS){
@@ -176,7 +175,7 @@ void pushOp(uint16_t opID){
 		mCurrentInstruction->buffers[i].len = 0;
 	}
 }
-
+// This function is used to push data array which some commands use it as a parameter
 void pushBuf(const void *buffer, int len, bool needReply = false){
 
 
@@ -228,7 +227,7 @@ void waitForReturn(){
 		exit(1);
 	}
 }
-
+//The datatype we support
 #define PUSHPARAM(type) \
 	void pushParam(type data){ \
 		memcpy((void *)mCurrentArgs, (const void *)&data, sizeof(type)); \
@@ -241,6 +240,7 @@ PUSHPARAM(GLuint);
 PUSHPARAM(GLint);
 //PUSHPARAM(GLenum);
 //PUSHPARAM(GLsizei);
+PUSHPARAM(GLubyte);
 PUSHPARAM(GLbyte);
 //PUSHPARAM(GLboolean);
 PUSHPARAM(GLdouble);
@@ -275,7 +275,7 @@ static int hash(byte *data, int len){
 int plen(GLenum type, int size, int stride, int length){
 	return ((getTypeSize(type) * size) + stride) * length;
 }
-
+// if some parameters in some commands are neither array or just a value, we take it as a pointer; we transfer data using the following function
 void sendPointers(int length) {
 	
 	//TODO: fill in other pointer values, or 
@@ -390,7 +390,8 @@ void sendPointers(int length) {
 }
 
 /********************************************************
-	SDL Intercepts
+	SDL Intercepts: some apps use SDL as displayer even 
+	though SDL will call X11 later. 
 ********************************************************/
 
 //SDL functors
@@ -531,7 +532,7 @@ extern "C" void SDL_GL_SwapBuffers( ) {
 */
 
 /********************************************************
-	X Exports
+ * X11 displayer API
 ********************************************************/
 
 #ifndef __APPLE__
@@ -594,8 +595,9 @@ extern "C" Display *XOpenDisplay(const char *display_name){
 
 
 extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
-
-    LOG("glXSwapBuffers, %d\n",bIsIntercept);
+    
+	static int count=0;
+    LOG("glXSwapBuffers, %d,%d\n",bIsIntercept,count++);
 	if (_glXSwapBuffers == NULL) {
 		_glXSwapBuffers = (void (*)(Display *, GLXDrawable)) dlsym(RTLD_NEXT, "glXSwapBuffers");
 	}
@@ -617,7 +619,25 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 	
 	if(theApp && !theApp->tick()){
 		exit(1);
-	}	
+	}
+
+	/*pushOp(256);
+	pushParam(0);
+	pushParam(0);
+	pushParam(gConfig->totalWidth);
+	pushParam(gConfig->totalHeight);
+	pushParam(GL_BGR);
+	pushParam(GL_UNSIGNED_BYTE);	
+	int bpp = 1;
+    
+    if(gConfig->format == GL_BGR || gConfig->format == GL_RGB) bpp = 3;
+    else if(gConfig->format == GL_RGBA || gConfig->format == GL_BGRA) bpp = 4;
+
+    gConfig->pixel = (unsigned char*)malloc(gConfig->totalWidth*gConfig->totalHeight*bpp);
+	
+	pushBuf(gConfig->pixel, gConfig->totalWidth *gConfig->totalHeight * bpp, true);
+	//LOG("TEST\n");
+	waitForReturn();	*/
 }
 
 #endif
@@ -691,7 +711,7 @@ extern "C" void glListBase(GLuint base){
 
 //7
 extern "C" void glBegin(GLenum mode){
-	LOG("glBegin\n");
+	//LOG("glBegin\n");
 	pushOp(7);
 	pushParam(mode);
 }
@@ -956,7 +976,7 @@ extern "C" void glEdgeFlagv(const GLboolean * flag){
 
 //43
 extern "C" void glEnd(){
-	LOG("glEnd\n");
+	//LOG("glEnd\n");
 	pushOp(43);
 }
 
@@ -1038,7 +1058,7 @@ extern "C" void glNormal3dv(const GLdouble * v){
 
 //56
 extern "C" void glNormal3f(GLfloat nx, GLfloat ny, GLfloat nz){
-	LOG("glNormal3f\n");
+	//LOG("glNormal3f\n");
 	pushOp(56);
 	pushParam(nx);
 	pushParam(ny);
@@ -1596,7 +1616,7 @@ extern "C" void glVertex3dv(const GLdouble * v){
 
 //136
 extern "C" void glVertex3f(GLfloat x, GLfloat y, GLfloat z){
-	LOG("glVertex3f\n");
+	//LOG("glVertex3f\n");
 	pushOp(136);
 	pushParam(x);
 	pushParam(y);
@@ -2145,7 +2165,7 @@ extern "C" void glDrawBuffer(GLenum mode){
 
 //203
 extern "C" void glClear(GLbitfield mask){
-	LOG("glClear\n");
+	//LOG("glClear\n");
 	pushOp(203);
 	pushParam(mask);
 }
@@ -2455,6 +2475,7 @@ extern "C" void glLogicOp(GLenum opcode){
 
 //243
 extern "C" void glStencilFunc(GLenum func, GLint ref, GLuint mask){
+	LOG("glStencilFunc %d, %d, %d\n", (unsigned int)(func), ref, mask);
 	pushOp(243);
 	pushParam(func);
 	pushParam(ref);
@@ -2463,7 +2484,6 @@ extern "C" void glStencilFunc(GLenum func, GLint ref, GLuint mask){
 
 //244
 extern "C" void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass){
-	LOG("glStencilOp %d, %d, %d\n", fail, zfail, zpass);
 	pushOp(244);
 	pushParam(fail);
 	pushParam(zfail);
@@ -4711,7 +4731,7 @@ extern "C" GLuint glCreateProgram(){
 	GLuint ret;
 	pushBuf(&ret, sizeof(GLuint), true);
 	waitForReturn();
-
+    
 	return ret;
 }
 
@@ -5426,7 +5446,8 @@ extern "C" void glVertexAttrib4usv(GLuint index, const GLushort * v){
 
 //576
 extern "C" void glVertexAttribPointer(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const GLvoid * pointer){
-	LOG("Called untested stub VertexAttribPointer!\n");
+	//LOG("Called untested stub VertexAttribPointer!\n");
+	LOG("glVertexAttribPointer %u, %d, %d, %d, %d\n",index,size,type,normalized,stride);
 	pushOp(575);
 	pushParam(index);
 	pushParam(size);

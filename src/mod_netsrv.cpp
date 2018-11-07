@@ -122,6 +122,7 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 		LOG("Read error\n");
 		return false;
 	}
+	LOG("Instruction number %d\n",num);
 	
 	
 
