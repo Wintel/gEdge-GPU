@@ -48,6 +48,8 @@ storedPointer rpNormals;
 //between frames (so mod_delta can compare the old frame, primarily)
 Instruction mInstructionsOne[MAX_INSTRUCTIONS];
 Instruction mInstructionsTwo[MAX_INSTRUCTIONS];
+unsigned char * pixels = NULL;
+unsigned int format = GL_RGBA;
 
 //The current target
 Instruction *mInstructions = mInstructionsOne;
@@ -597,7 +599,7 @@ extern "C" Display *XOpenDisplay(const char *display_name){
 extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
     
 	static int count=0;
-    LOG("glXSwapBuffers, %d,%d\n",bIsIntercept,count++);
+  //  LOG("glXSwapBuffers, %d,%d\n",bIsIntercept,count++);
 	if (_glXSwapBuffers == NULL) {
 		_glXSwapBuffers = (void (*)(Display *, GLXDrawable)) dlsym(RTLD_NEXT, "glXSwapBuffers");
 	}
@@ -621,7 +623,7 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 		exit(1);
 	}
 
-	/*pushOp(256);
+   /* pushOp(256);
 	pushParam(0);
 	pushParam(0);
 	pushParam(gConfig->totalWidth);
@@ -630,14 +632,15 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 	pushParam(GL_UNSIGNED_BYTE);	
 	int bpp = 1;
     
-    if(gConfig->format == GL_BGR || gConfig->format == GL_RGB) bpp = 3;
-    else if(gConfig->format == GL_RGBA || gConfig->format == GL_BGRA) bpp = 4;
+    if(format == GL_BGR || format == GL_RGB) bpp = 3;
+    else if(format == GL_RGBA || format == GL_BGRA) bpp = 4;
 
-    gConfig->pixel = (unsigned char*)malloc(gConfig->totalWidth*gConfig->totalHeight*bpp);
+    pixels = (unsigned char*)malloc(gConfig->totalWidth*gConfig->totalHeight*bpp);
 	
-	pushBuf(gConfig->pixel, gConfig->totalWidth *gConfig->totalHeight * bpp, true);
+	pushBuf(pixels, gConfig->totalWidth *gConfig->totalHeight * bpp, true);
 	//LOG("TEST\n");
-	waitForReturn();	*/
+	waitForReturn();
+	free(pixels);*/
 }
 
 #endif
@@ -759,7 +762,7 @@ extern "C" void glColor3dv(const GLdouble * v){
 
 //13
 extern "C" void glColor3f(GLfloat red, GLfloat green, GLfloat blue){
-	LOG("glColor3f\n");
+	//LOG("glColor3f\n");
 	pushOp(13);
 	pushParam(red);
 	pushParam(green);

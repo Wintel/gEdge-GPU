@@ -24,7 +24,7 @@ NetClientModule::NetClientModule()
 	for(int i=0;i<gConfig->numOutputs;i++){	
 		struct addrinfo hints, *res;
 	
-		memset(&hints, 0, sizeof hints);
+		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		
@@ -58,9 +58,14 @@ NetClientModule::NetClientModule()
 			//exit(1);
 	//		continue;
 	//	}
-		LOG("Connected to remote pipeline on %s:%d\n", addr.c_str(), port);	
+	  
 	
 		mSockets.push_back(s);
+		mConnect.push_back(true);
+		consumption.push_back(0.0);
+
+		LOG("Connected to remote pipeline on %s:%d\n", addr.c_str(), port);	
+
 	}
 
 }
@@ -96,57 +101,52 @@ bool NetClientModule::process(vector<Instruction *> *list)
 			}
 		}			
 		
-		/*
-		byte len = (sizeof(Instruction) - MAX_ARG_LEN) + i->arglen;
-		
-		// now send the new instruction
-		//first the length byte
-		if(internalWrite(&len, 1) != 1) {
-			LOG("Connection problem (didn't send instruction)!\n");
-		}
-		
-		//now the struct itself	
-		if(internalWrite(i, len) != len) {
-			LOG("Connection problem (didn't send instruction)!\n");
-			return false;
-		}
-		*/
 		//now the struct itself	
 		if(internalWrite(i, sizeof(Instruction)) != sizeof(Instruction)) {
 			LOG("Connection problem (didn't send instruction)!\n");
 			return false;
 		}
-
 		//Now see if we need to send any buffers
-
+       
 		for(int n=0;n<3;n++) {
 			int l = i->buffers[n].len;
-
+			//LOG("recv buffer %d\n",l);
 			if(l > 0) {
-				
 				if(internalWrite(i->buffers[n].buffer, l) != l) {
 					LOG("Connection problem (didn't write buffer %d)!\n", l);
 					return false;
 				}
 				//And check if we're expecting a buffer back in response
 				if(i->buffers[n].needReply) {
-
+                    
 					sendBuffer();
-					int x=internalRead(i->buffers[n].buffer, l);
-					if(x!= l) {
-						LOG("Connection problem: NetClient (didn't recv buffer %d got: %d, instruction: %d)!\n", l, x, i->id);
-						return false;
-					}
-					LOG("recv buffer %d and %d\n",l,x);
-					//LOG("got buffer back!\n");
+					//if(i->id!=256)
+					//{
+					   int x=internalRead(i->buffers[n].buffer, l);
+					   if(x!= l) 
+					   {
+						  LOG("Connection problem: NetClient (didn't recv buffer %d got: %d, instruction: %d)!\n", l, x, i->id);
+						   return false;
+					   }
+					//}
+				//	else
+				//	{
+				//		uint32_t num=0;
+				//		int len = internalRead(i->buffers[n].buffer, sizeof(uint32_t));
+				//		if(len!=sizeof(uint32_t))
+				//		{
+				//			LOG("Connection problem: NetClient (didn't recv buffer %d got: %d, instruction: %d)!\n",len, sizeof(uint32_t), i->id);
+				//			return false;
+				//		}
+				//	}
 				}
 			}
 		}
 		counter++;
 	}
 	
+
 	sendBuffer(); //send anything that's outstanding
-	
 	Stats::count("mod_netclient write", totalSent);
 	totalSent = 0;
 
@@ -166,7 +166,20 @@ bool NetClientModule::sync()
 }
 
 
-
+int NetClientModule::min_func()
+{
+	int index=0;
+	double timevalue=0;
+	for(int i=0;i<consumption.size();i++)
+	{
+		if(consumption[i]<timevalue)
+		{
+		   timevalue = consumption[i];
+		   index = i;
+		}
+	}
+	return index;
+}
 
 /*******************************************************************************
  Write to the network
@@ -186,36 +199,53 @@ int NetClientModule::internalWrite(void* buf, int nByte)
 
 void NetClientModule::sendBuffer()
 {
+	static int count=0;
+
 	if(iSendBufPos == 0){
 		return;
 	}
 	
 	byte *mCompressedBuf = NULL;
 	
-	if(gConfig->networkCompression){		
+	if(gConfig->networkCompression){
+		LOG("Compressed!!!\n");		
 		mCompressedBuf = Compression::getBuf();
 		iSendBufPos = Compression::compress(mSendBuf, iSendBufPos);
 	}
 	
-	//LOG("NetClientModule::sendBuffer(%d)\n", iSendBufPos);
 	for(int i=0;i<(int)mSockets.size();i++){
-		uint32_t a = write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
-		uint32_t b = 0;	
-		if(!gConfig->networkCompression){		
+		
+		 if(!mConnect[i])
+		    return;
+		 uint32_t a = write(mSockets[i], &iSendBufPos, sizeof(iSendBufPos));
+		 uint32_t b = 0;	
+		 clock_t time0;
+		 clock_t time1;
+		 time0 = clock();
+		 if(!gConfig->networkCompression){		
 			b = write(mSockets[i], mSendBuf, iSendBufPos);			
-		}else{
+		 }else{
 			b = write(mSockets[i], mCompressedBuf, iSendBufPos);
-		}
-		if(a != sizeof(iSendBufPos) && b != iSendBufPos){
+		 }
+	 	time1 = clock()-time0;
+	    double time_taken = ((double)time1)/CLOCKS_PER_SEC;
+	/*	if(time_taken>0.0001)
+		{
+		    close(mSockets[i]);
+			mConnect[i] = false;
+			std::cout<<(float)time_taken<<std::endl;
+		}*/
+		 if(a != sizeof(iSendBufPos) && b != iSendBufPos){
 			LOG("Failure to send: %d/%d\n", i, iSendBufPos);
-		}		
-		totalSent += a;
-		totalSent += b;
+		 }	
+			
+		 totalSent += a;
+		 totalSent += b;
 	}
-	//LOG("sent ok\n");
 	iSendBufPos = 0;
 	bytesLeft = SEND_BUFFER_SIZE;
-	
+	if(count!=-1)
+	   count++;
 }
 
 
@@ -225,7 +255,7 @@ void NetClientModule::sendBuffer()
 *******************************************************************************/
 int NetClientModule::internalRead(void *buf, size_t count)
 {
-	//LOG("About to read %d\n", count);
+	LOG("About to read %d\n", count);
 	uint32_t n = 0;
 	//Read from each renderer
 	for(int i=0;i<(int)mSockets.size();i++){
@@ -233,7 +263,7 @@ int NetClientModule::internalRead(void *buf, size_t count)
 		byte *d = (byte *)buf;
 		while(n < count){
 		    n += read(mSockets[i], d + n, count);		  
-		    //LOG("%d\n", n);
+		    LOG("%d\n", n);
 		}		
 	}
 	//LOG("done\n");

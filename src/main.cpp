@@ -7,7 +7,6 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <cstdlib>
-
 /*******************************************************************************
 	Globals
 *******************************************************************************/
@@ -253,7 +252,6 @@ bool App::tick()
 		stats_begin();
 	}
 
-    LOG("mModules size %d\n",(int)mModules.size());
    // printf("mModules size %d\n",mModules.size());
 	//Go through each module and process the frame
 	for(int i=0;i<(int)mModules.size();i++) {
@@ -265,7 +263,8 @@ bool App::tick()
 			LOG("Failed to process frame (in %d), bailing out\n", i);
 			return false;
 		}
-		
+	 //   LOG("mModules size %d\n",(int)mModules.size());
+
 		//TODO: handle bytes and such
 		thisFrame = m->resultAsList();
 		
@@ -273,8 +272,7 @@ bool App::tick()
 			LOG("!thisFrame\n");
 			return false;
 		}
-	}
-	
+	}	
     
 	//return appropriate frames
 	for(int n=0;n<(int)thisFrame->size();n++){
@@ -284,11 +282,13 @@ bool App::tick()
 			//But only do so if /we/ created the instruction
 			if(iter->buffers[i].needReply && iter->buffers[i].needRemoteReply) {
 				LOG("need a reply %d\n", i);
-				LOG_INSTRUCTION(iter);
 				mModules[0]->reply(iter, i);
-				
+				LOG_INSTRUCTION(iter);
 				iter->buffers[i].needReply = false;
-				
+				if(iter->id==256)
+				{
+				 free(iter->buffers[i].buffer);
+				}
 				Stats::increment("Pipeline stalls due to replies");
 			}
 		}

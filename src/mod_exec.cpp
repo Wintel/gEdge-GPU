@@ -36,114 +36,7 @@ bool bezelCompensation = true;
 /*******************************************************************************
 	send photos
 *******************************************************************************/
-
-int send_image(int socket){
-
-   FILE *picture;
-   static int frameid=0;
-   int size, read_size, stat, packet_index;
-   char send_buffer[10240], read_buffer[256];
-   packet_index = 1;
-
-   char filename_next[256];
-   char filename[256];
-   snprintf(filename,256,"%s%d.bmp","tmp",frameid);
-   snprintf(filename_next,256,"%s%d.bmp","tmp",frameid+1);
-   picture = fopen(filename_next, "r");
-
-   while(picture == NULL) {
-	    picture = fopen(filename_next, "r");
-	} 
  
-   picture = fopen(filename, "r");
-   while(!feof(picture)) {
-   //while(packet_index = 1){
-      //Read from the file into our send buffer
-      read_size = fread(send_buffer, 1, sizeof(send_buffer)-1, picture);
-
-      //Send data through our socket 
-      do{
-        stat = write(socket, send_buffer, read_size);  
-      }while (stat < 0);
-
-      printf("Packet Number: %i\n",packet_index);
-      printf("Packet Size Sent: %i\n",read_size);     
-      printf(" \n");
-      printf(" \n");
-
-
-      packet_index++;  
-
-      //Zero out our send buffer
-      bzero(send_buffer, sizeof(send_buffer));
-     }
-	 frameid++;
-	 fclose(picture);
-    }
-
-
-void * pthread_socket(void *threadid) {
-	struct sockaddr_in address;
-    int size,sock = 0, valread, new_socket,stat;
-    struct sockaddr_in serv_addr;
-	FILE* picture;
-     char buffer[1024] = {0}, read_buffer[256];
-    int i=0;
-    memset(&serv_addr, '0', sizeof(serv_addr));
-  
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons(PORT);
-     if(inet_pton(AF_INET, "10.0.1.26", &serv_addr.sin_addr)<=0) 
-    {
-        printf("\nInvalid address/ Address not supported \n");
-        return 0;
-    }
-    
-     if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-     {
-        printf("\n Socket creation error \n");
-        return 0;
-     } 
-      
-    // Convert IPv4 and IPv6 addresses from text to binary form
-  
-     if ((new_socket=connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
-     {
-        printf("\nConnection Failed \n");
-        return 0;
-     }
-
-     while(picture==NULL)
-	  picture = fopen("tmp1.bmp", "r");
-     picture = fopen("tmp0.bmp", "r");
-     fseek(picture, 0, SEEK_END);
-     size = ftell(picture);
-     fseek(picture, 0, SEEK_SET);
-     printf("Total Picture size: %i\n",size);
-
-     //Send Picture Size
-     printf("Sending Picture Size\n");
-     write(sock, (void *)&size, sizeof(int));
-
-   //Send Picture as Byte Array
-    printf("Sending Picture as Byte Array\n");
-
-    do { 
-      stat=read(sock, &read_buffer , 255);
-    } while (stat < 0);
-    
-	 while(1)
-    {
-     printf("finished%d\n",i);
-    send_image(sock);
-  //  i++;
-    //sleep(1);
-   }
-    //if ( shutdown( new_socket, SHUT_WR ) == -1 ) err( "socket shutdown failed" );
-	close(sock);
-	pthread_exit(NULL);
-}
-
 
 /*******************************************************************************
 	Module
@@ -159,16 +52,6 @@ ExecModule::ExecModule()
 		exit(1);
 	}
 
-
-
-	pthread_t tid;
-	int rc;
-
-	/*rc = pthread_create(&tid , NULL, pthread_socket, (void *)0);
-	if (rc){
-		printf("ERROR; return code from pthread_create() is %d\n", rc);
-		exit(-1);
-	}*/
 }
 
 
@@ -408,6 +291,12 @@ static void EXEC_CGLSwapBuffers(byte *commandbuf)
 	//printf("SWAP\n");
 	SDL_GL_SwapBuffers();
 	Stats::increment("Rendered frames");
+	//int bpp = 1;   
+    //if(format == GL_BGR || format == GL_RGB) bpp = 3;
+    //else if(format == GL_RGBA || format == GL_BGRA) bpp = 4;
+	//pixels = (unsigned char*)malloc(gConfig->totalWidth*gConfig->totalHeight*bpp);
+	//glReadPixels(0,0,gConfig->totalWidth,gConfig->totalHeight,GL_RGB,GL_UNSIGNED_BYTE,pixels);
+	//free(pixels);
 	//EXEC_glFlush(commandbuf);
 }
 
@@ -2938,11 +2827,12 @@ static void EXEC_glReadPixels(byte *commandbuf)
 	GLenum *type = (GLenum*)commandbuf;  commandbuf += sizeof(GLenum);
 	//LOG("glReadPixels %d %d %d %d %d %d\n", *x, *y, *width, *height,*format,*type);
 	GLubyte * pixel_data = (GLubyte*)popBuf();
-	glReadPixels(*x, *y, *width, *height, GL_BGR, *type, (GLvoid *)pixel_data);
-    create_ppm("tmp", nscreenshots, *width, *height, 255, 3, pixel_data);
+	glReadPixels(*x, *y, *width, *height, GL_BGR, *type,pixel_data);
+    //create_ppm("tmp", nscreenshots, *width, *height, 255, 3, pixel_data);
 
 
 	nscreenshots++;
+	//free(pixel_data);
 	//cout<<"glReadPixels\n"<<endl;
 }
 

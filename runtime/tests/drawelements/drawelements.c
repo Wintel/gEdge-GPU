@@ -453,7 +453,7 @@ int drawGLScene( GLvoid )
     /* Draw it to the screen */
     SDL_GL_SwapBuffers( );
     //glutSwapBuffers();
-   // glReadPixels(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, FORMAT, GL_UNSIGNED_BYTE, pixels);
+    glReadPixels(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, FORMAT, GL_UNSIGNED_BYTE, pixels);
     
      //for(int i=0;i<8;i++)
       //printf("%u\n",strlen(pixels));
@@ -564,7 +564,9 @@ int main( int argc, char **argv )
 			{
 			case SDL_QUIT:
 			   
-			    done = TRUE;
+			    //done = TRUE;
+                            SDL_Quit();
+                            getchar(); 
 			    break;
 			default:
 			    break;
@@ -576,7 +578,6 @@ int main( int argc, char **argv )
 		drawGLScene( );
 	}
    
-    //getchar(); 
     /* clean ourselves up and exit */
     Quit( 0 );
     /* Should never get here */

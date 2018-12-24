@@ -106,12 +106,13 @@ public:
 class NetClientModule : public Module
 {
     vector<int> mSockets;
-	
+	vector<bool> mConnect;
+	vector<double> consumption;
     int numConnections;
     
     int internalWrite(void* buf, int nByte);
 	int internalRead(void *buf, size_t count);
-	
+	int min_func();
 	void sendBuffer();
 	
 public:
@@ -147,8 +148,9 @@ public:
 class MulticastClientModule : public Module
 {
     vector<int> mSockets;
+	//vector<double> consumption;
     int numConnections;
-    
+    vector<bool> mConnects;
     int internalWrite(void* buf, int nByte);
 	int internalRead(void *buf, size_t count);
 	

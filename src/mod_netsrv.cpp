@@ -3,6 +3,7 @@
 ********************************************************/
 
 #include "main.h"
+#include <SDL/SDL.h>
 
 const int recieveBufferSize = 268435456;
 //const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
@@ -122,7 +123,6 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 		LOG("Read error\n");
 		return false;
 	}
-	LOG("Instruction number %d\n",num);
 	
 	
 
@@ -181,6 +181,7 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 	if(totalRead == 0){
 		//Other side has hung up
 		LOG("Connection dropped\n");
+		SDL_Quit();
 		return false;
 	}
 	
@@ -195,7 +196,14 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 
 void NetSrvModule::reply(Instruction *instr, int i)
 {
-	internalWrite(instr->buffers[i].buffer, instr->buffers[i].len);
+/*	if(instr->id ==256)
+	{
+       internalWrite((byte*)instr->buffers[i].len, sizeof(uint32_t));
+	}
+	else*/
+	{
+	 internalWrite(instr->buffers[i].buffer, instr->buffers[i].len);
+	}
 }
 
 
@@ -273,8 +281,8 @@ void NetSrvModule::recieveBuffer(void)
 
 int NetSrvModule::internalWrite(byte *input, int nByte)
 {
-	//LOG("internalWrite %d\n", nByte);
+	LOG("internalWrite %d\n", nByte);
 	int ret = mClientSocket->write(input, nByte);
-	//LOG("done!\n");
+	LOG("done!\n");
 	return ret;
 }
