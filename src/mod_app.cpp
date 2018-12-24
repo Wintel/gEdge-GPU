@@ -623,7 +623,7 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 		exit(1);
 	}
 
-   /* pushOp(256);
+    pushOp(256);
 	pushParam(0);
 	pushParam(0);
 	pushParam(gConfig->totalWidth);
@@ -640,7 +640,7 @@ extern "C" void glXSwapBuffers(Display *  dpy,  GLXDrawable  drawable){
 	pushBuf(pixels, gConfig->totalWidth *gConfig->totalHeight * bpp, true);
 	//LOG("TEST\n");
 	waitForReturn();
-	free(pixels);*/
+	free(pixels);
 }
 
 #endif

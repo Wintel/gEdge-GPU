@@ -120,29 +120,21 @@ bool NetClientModule::process(vector<Instruction *> *list)
 				if(i->buffers[n].needReply) {
                     
 					sendBuffer();
-					//if(i->id!=256)
-					//{
-					   int x=internalRead(i->buffers[n].buffer, l);
-					   if(x!= l) 
-					   {
-						  LOG("Connection problem: NetClient (didn't recv buffer %d got: %d, instruction: %d)!\n", l, x, i->id);
-						   return false;
-					   }
-					//}
-				//	else
-				//	{
-				//		uint32_t num=0;
-				//		int len = internalRead(i->buffers[n].buffer, sizeof(uint32_t));
-				//		if(len!=sizeof(uint32_t))
-				//		{
-				//			LOG("Connection problem: NetClient (didn't recv buffer %d got: %d, instruction: %d)!\n",len, sizeof(uint32_t), i->id);
-				//			return false;
-				//		}
-				//	}
+					if(i->id==256)
+			        {
+				     l = 5;
+			        }
+					int x=internalRead(i->buffers[n].buffer, l);
+					if(x!= l) 
+					{
+						LOG("Connection problem: NetClient (didn't recv buffer %d got: %d, instruction: %d)!\n", l, x, i->id);
+						return false;
+					}
 				}
 			}
 		}
 		counter++;
+		LOG("done\n");
 	}
 	
 
@@ -266,6 +258,5 @@ int NetClientModule::internalRead(void *buf, size_t count)
 		    LOG("%d\n", n);
 		}		
 	}
-	//LOG("done\n");
 	return n;
 }
