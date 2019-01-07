@@ -20,8 +20,8 @@ OBJS_APP := $(patsubst mod_app.o,,$(OBJS))
 DEPS := $(wildcard include/*.h) 
 
 #Compiler flags. Note the arch-specific ones
-CXXFLAGS=$(ARCH) -I/opt/local/include/ -Iinclude -O3 -Wextra -g -fPIC -fvisibility-inlines-hidden 
-LDFLAGS=-lconfuse -llzo2 -lz `sdl-config --cflags --libs` -lSDL_net -lconfuse -lGLEW 
+CXXFLAGS=$(ARCH) -I/opt/local/include/ -Iinclude -O3 -Wextra -g -fPIC -fvisibility-inlines-hidden -I/usr/include/nvidia/gdk -L/usr/lib/x86_64-linux-gnu/libnvidia-ml.so.390.87
+LDFLAGS=-lconfuse -llzo2 -lz `sdl-config --cflags --libs` -lSDL_net -lconfuse -lGLEW -lnvidia-ml
 DARWIN_LDFLAGS=-framework,Cocoa -framework OpenGL -lintl
 LINUX_LDFLAGS=-lGL -lGLU -lpthread
 

@@ -1,0 +1,23 @@
+libGL: OpenDriver: trying /home/dongjitang/Mesa/mesa-18.0.0/lib/tls/nouveau_dri.so
+libGL: OpenDriver: trying /home/dongjitang/Mesa/mesa-18.0.0/lib/nouveau_dri.so
+libGL: driver does not expose __driDriverGetExtensions_nouveau(): /home/dongjitang/Mesa/mesa-18.0.0/lib/nouveau_dri.so: undefined symbol: __driDriverGetExtensions_nouveau
+libGL error: core dri or dri2 extension not found
+libGL error: failed to load driver: nouveau
+libGL: OpenDriver: trying /home/dongjitang/Mesa/mesa-18.0.0/lib/tls/swrast_dri.so
+libGL: OpenDriver: trying /home/dongjitang/Mesa/mesa-18.0.0/lib/swrast_dri.so
+libGL: Can't open configuration file /home/dongjitang/.drirc: No such file or directory.
+Mesa: Mesa 18.0.0 DEBUG build
+Mesa: _mesa_make_current()
+Mesa: glClear 0x4000
+Mesa: _mesa_make_current()
+Mesa: _mesa_make_current()
+Mesa: glViewport 0 0 640 480
+Mesa: glClear 0x4000
+Mesa: glLoadIdentity()
+Mesa: glOrtho(-1.333333, 1.333333, -1.000000, 1.000000, 1.000000, -1.000000)
+Mesa: _mesa_make_current()
+Mesa: _mesa_make_current()
+Mesa: _mesa_make_current()
+Mesa: _mesa_make_current()
+Mesa: _mesa_make_current()
+drisw_create_context_attribs _mesa_initialize_vbo_ftxfmt u_current_set_context u_current_set_context u_current_set_context u_current_set_context glViewport MatrixMode  MatrixMode  u_current_set_context u_current_set_context u_current_set_context u_current_set_context u_current_set_context u_current_set_context dri_destroy_screen 

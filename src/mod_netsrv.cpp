@@ -3,7 +3,8 @@
 ********************************************************/
 
 #include "main.h"
-#include <SDL/SDL.h>
+#include <cstdio>
+
 
 const int recieveBufferSize = 268435456;
 //const int recieveBufferSize = sizeof(Instruction) * MAX_INSTRUCTIONS;
@@ -116,7 +117,7 @@ bool NetSrvModule::process(vector<Instruction *> *list)
 	uint32_t num = 0;
 	
 	iInstructionCount = 0;
-	LOG("NetSrvModule process\n");
+	//LOG("NetSrvModule process\n");
 
 	int len = internalRead((byte *)&num, sizeof(uint32_t));
 	if(len != sizeof(uint32_t) ) {
@@ -265,8 +266,8 @@ void NetSrvModule::recieveBuffer(void)
 
 int NetSrvModule::internalWrite(byte *input, int nByte)
 {
-	LOG("internalWrite %d\n", nByte);
+	//LOG("internalWrite %d\n", nByte);
 	int ret = mClientSocket->write(input, nByte);
-	LOG("done!\n");
+	//LOG("done!\n");
 	return ret;
 }

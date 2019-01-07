@@ -6,6 +6,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <string.h>
 #include <cstdlib>
 /*******************************************************************************
 	Globals
@@ -29,7 +30,7 @@ App *theApp = NULL;
 
 int App::run(int argc, char **argv)
 {
-	 int sockfd, portno;
+	 int sockfd, portno,util;
     char buffer[256];
    struct sockaddr_in addr, clientaddr;
     int n;
@@ -74,13 +75,16 @@ int App::run(int argc, char **argv)
 	int client = 0, pid;
 	while(1)
 	{
-	  char* port;
+	  string port,utilRate;
 	 if ((client = accept(sockfd, (struct sockaddr *) &clientaddr, &clientlen)) < 0) {
 		LOG("Failed to accept client connection\n");
 		exit(1);
 	  }
+	  util = GPU_util();
       portno+=1; 
-	  port=(char*)toString(portno).c_str();
+	  port=toString(portno);
+	  utilRate=toString(util);
+	  char* info = (char*)(port+","+utilRate).c_str();
       pid = fork();
 	  if (pid < 0) {
               LOG("ERROR in new process creation\n");
@@ -88,8 +92,8 @@ int App::run(int argc, char **argv)
       }
 	  if(pid==0)
 	  {
-	    n = write(client, port, strlen(port));
-		LOG("write return value: %s,%d\n",port,strlen(port));
+	    n = write(client, info, strlen(info));
+		LOG("write return value: %s,%d\n",info,strlen(info));
         if (n < 0)
 		{
           LOG("ERROR writing to socket");
@@ -116,6 +120,45 @@ int App::run(int argc, char **argv)
 	return 0;
 }
 
+int App:: GPU_util()
+{
+	nvmlReturn_t result;
+    unsigned int device_count,utilization;
+
+    result = nvmlInit();
+    if (result != NVML_SUCCESS)
+        return 1;
+    
+    result = nvmlDeviceGetCount(&device_count);
+    if (result != NVML_SUCCESS)
+        return 2;
+
+    for (int i = 0; i < device_count; ++i) {
+        nvmlDevice_t device;
+        result = nvmlDeviceGetHandleByIndex(0, &device);
+        if (result != NVML_SUCCESS)
+            return 3;
+
+        char device_name[NVML_DEVICE_NAME_BUFFER_SIZE];
+        result = nvmlDeviceGetName(device, device_name, NVML_DEVICE_NAME_BUFFER_SIZE);
+        if (result != NVML_SUCCESS)
+            return 4;
+
+        //std::printf("DenvmlDeviceGetNamevice %d: %s\n", i, device_name);
+
+        nvmlUtilization_st device_utilization;
+        result = nvmlDeviceGetUtilizationRates(device, &device_utilization);
+
+        if (result != NVML_SUCCESS)
+            return 5;
+
+        //std::printf("GPU Util: %u, Mem Util: %u\n", device_utilization.gpu, device_utilization.memory);
+		utilization = device_utilization.gpu;
+        std::printf("GPU Util: %u\n",device_utilization.gpu);
+    }
+    nvmlShutdown();
+    return utilization;
+}
 
 /*******************************************************************************
 	Entry if invoked as capture (shared library)
@@ -130,7 +173,7 @@ bool App::run_shared(string src)
 
 	char buffer[1024] = {0};
 	int n=0;
-	
+	char* phase;
 //	memset(&serv_addr, '0', sizeof(serv_addr));
 	//Load the config file
 	init(true, "capture");
@@ -172,7 +215,7 @@ bool App::run_shared(string src)
 			exit(1) ;
 		}	
 		//set TCP options 
-		int one = 1;
+		int one = 1,portno,util;
 
 		setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 		setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
@@ -180,6 +223,7 @@ bool App::run_shared(string src)
 		struct sockaddr_in mAddr; 
 
 		int c = connect(s, res->ai_addr, res->ai_addrlen);
+        int count = 0;
 
 		bzero(buffer,256);
         
@@ -199,10 +243,28 @@ bool App::run_shared(string src)
          LOG("ERROR reading from socket");
 		 continue;
 		}
-        int portno = atoi(buffer);
-		LOG("port number %d\n",portno);
-		portNum.push_back(portno);
-		
+        phase = strtok(buffer,",");
+		while(phase)
+		{
+		  if(count==0)
+		  {
+           portno = atoi(phase);
+           LOG("port number %d\n",portno);
+		   portNum.push_back(portno);
+		  }
+		  else
+		  {
+			util = atoi(phase);
+			LOG("GPU util rate %d\n",util);
+		  }
+		  phase = strtok (NULL, " ,");
+		  count++;
+		}
+		if(util<=50)
+		{
+			index = i;
+			break;
+		}		
 	}
 	
 	//Write our pid out
@@ -238,6 +300,7 @@ void App::init(bool shared, const char *id)
 	gConfig = new Config(configFile, string(id ? id : "null"));
    // portNum.ClearAll();
 	bHasInit = true;
+	index = 0;
 }
 
 
@@ -281,9 +344,9 @@ bool App::tick()
 			//If we need a reply, send it
 			//But only do so if /we/ created the instruction
 			if(iter->buffers[i].needReply && iter->buffers[i].needRemoteReply) {
-				LOG("need a reply %d\n", i);
+				//LOG("need a reply %d\n", i);
 				mModules[0]->reply(iter, i);
-				LOG_INSTRUCTION(iter);
+				//LOG_INSTRUCTION(iter);
 				iter->buffers[i].needReply = false;
 				if(iter->id==256)
 				{

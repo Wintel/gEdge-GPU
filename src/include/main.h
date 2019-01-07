@@ -22,7 +22,11 @@
 #include "mongoose.h"
 #include <pthread.h>
 #include <stdio.h>
+#include <cstdio>
 #include <time.h>
+#include <nvml.h>
+#include <SDL/SDL.h>
+#pragma comment(lib,"nvml");
 
 
 
@@ -53,12 +57,16 @@ public:
 
 	//called when we're invoked from the command line
 	int run(int argc, char **argv);
+	int index;
+	
 	vector<Module *> mModules;
 	vector<int> portNum;
 
 	//called when we're invoked from LD_PRELOAD
 	//Will return false if we're not configured to run off this source
 	bool run_shared(string src);
+
+	int GPU_util();
 
 	bool tick();
 

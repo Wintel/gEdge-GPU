@@ -7,6 +7,7 @@
         "fstream": "cpp",
         "cerrno": "cpp",
         "iostream": "cpp",
-        "hash_map": "cpp"
+        "hash_map": "cpp",
+        "cstdlib": "cpp"
     }
 }

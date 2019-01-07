@@ -21,17 +21,17 @@ int totalSent;
 NetClientModule::NetClientModule()
 {    
 	//Make each socket
-	for(int i=0;i<gConfig->numOutputs;i++){	
+	//for(int i=0;i<gConfig->numOutputs;i++){	
 		struct addrinfo hints, *res;
 	
 		memset(&hints, 0, sizeof(hints));
 		hints.ai_family = AF_UNSPEC;
 		hints.ai_socktype = SOCK_STREAM;
 		
-		string addr = gConfig->outputAddresses[i];
-		int port =theApp->portNum[i];
+		string addr = gConfig->outputAddresses[theApp->index];
+		int port =theApp->portNum[theApp->index];
 		
-		LOG("port number: %d,ip address: %s\n",port,gConfig->outputAddresses[i].c_str());
+		LOG("port number: %d,ip address: %s\n",port,gConfig->outputAddresses[theApp->index].c_str());
 		getaddrinfo(addr.c_str(), toString(port).c_str(), &hints, &res);
 		
 		int s = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
@@ -59,14 +59,16 @@ NetClientModule::NetClientModule()
 	//		continue;
 	//	}
 	  
-	
+	    mSockets.clear();
+		mConnect.clear();
+		consumption.clear();
 		mSockets.push_back(s);
 		mConnect.push_back(true);
 		consumption.push_back(0.0);
 
 		LOG("Connected to remote pipeline on %s:%d\n", addr.c_str(), port);	
 
-	}
+	//}
 
 }
 
@@ -134,7 +136,7 @@ bool NetClientModule::process(vector<Instruction *> *list)
 			}
 		}
 		counter++;
-		LOG("done\n");
+		//LOG("done\n");
 	}
 	
 
@@ -200,7 +202,7 @@ void NetClientModule::sendBuffer()
 	byte *mCompressedBuf = NULL;
 	
 	if(gConfig->networkCompression){
-		LOG("Compressed!!!\n");		
+		//LOG("Compressed!!!\n");		
 		mCompressedBuf = Compression::getBuf();
 		iSendBufPos = Compression::compress(mSendBuf, iSendBufPos);
 	}
@@ -247,7 +249,7 @@ void NetClientModule::sendBuffer()
 *******************************************************************************/
 int NetClientModule::internalRead(void *buf, size_t count)
 {
-	LOG("About to read %d\n", count);
+	//LOG("About to read %d\n", count);
 	uint32_t n = 0;
 	//Read from each renderer
 	for(int i=0;i<(int)mSockets.size();i++){
@@ -255,7 +257,7 @@ int NetClientModule::internalRead(void *buf, size_t count)
 		byte *d = (byte *)buf;
 		while(n < count){
 		    n += read(mSockets[i], d + n, count);		  
-		    LOG("%d\n", n);
+		    //LOG("%d\n", n);
 		}		
 	}
 	return n;

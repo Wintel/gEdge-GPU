@@ -1878,7 +1878,7 @@ extern "C" void glMaterialf(GLenum face, GLenum pname, GLfloat param){
 
 //170
 extern "C" void glMaterialfv(GLenum face, GLenum pname, const GLfloat * params){
-	LOG("glMaterialfv\n");
+	//LOG("glMaterialfv\n");
 	//LOG("Called untested stub Materialfv!\n");
 	pushOp(170);
 	pushParam(face);
@@ -1933,7 +1933,7 @@ extern "C" void glScissor(GLint x, GLint y, GLsizei width, GLsizei height){
 
 //177
 extern "C" void glShadeModel(GLenum mode){
-	LOG("glShadeModel\n");
+	//LOG("glShadeModel\n");
 	pushOp(177);
 	pushParam(mode);	
 }
@@ -2253,7 +2253,7 @@ extern "C" void glDisable(GLenum cap){
 
 //215
 extern "C" void glEnable(GLenum cap){
-	LOG("glEnable\n");
+	//LOG("glEnable\n");
 	pushOp(215);
 	pushParam(cap);
 }
