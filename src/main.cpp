@@ -6,27 +6,108 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <pthread.h>
 #include <string.h>
 #include <cstdlib>
 /*******************************************************************************
 	Globals
 *******************************************************************************/
 static bool bHasInit = false;
+static long double networkusage = 0.0;
 bool bIsIntercept = false;
-
 Config *gConfig = NULL;
 App *theApp = NULL;
 //NetSrvModule* netserver=NULL;
  
 /*******************************************************************************
-	Entry if invoked as a renderer output
+	System monitor
 *******************************************************************************/
-//void * pthread_socket1(void *threadid)
-//{
-//     while( theApp->tick() ){ 
-		//run tick() until we decide to bail
-//	}
-//}
+long double App::getNetworkBandwidth()
+{
+	long double recv1 = 0.0,recv2 = 0.0;
+    long double send1 = 0.0,send2 = 0.0;
+    char name[32],buf[256];
+    FILE *fp;
+
+    fp = fopen("/proc/net/dev", "r");
+    fgets(buf,255,fp);
+    fgets(buf,255,fp);
+    fscanf(fp,"%s %Lf %*LF %*LF %*LF %*LF %*LF %*LF %*LF %Lf",&name[0],&recv1,&send1);
+    fgets(buf,255,fp);
+    while(strcmp(name,"enp3s0:")!= 0){
+        fscanf(fp,"%s %Lf %*LF %*LF %*LF %*LF %*LF %*LF %*LF %Lf",&name[0],&recv1,&send1);
+        fgets(buf,255,fp);
+    }
+    fclose(fp);
+    sleep(1);
+
+
+    fp = fopen("/proc/net/dev", "r");
+    fgets(buf,255,fp);
+    fgets(buf,255,fp);
+    fscanf(fp,"%s %Lf %*LF %*LF %*LF %*LF %*LF %*LF %*LF %Lf",&name[0],&recv2,&send2);
+    fgets(buf,255,fp);
+    while(strcmp(name,"enp3s0:")!= 0){
+        fscanf(fp,"%s %Lf %*LF %*LF %*LF %*LF %*LF %*LF %*LF %Lf",&name[0],&recv2,&send2);
+        fgets(buf,255,fp);
+    }
+    fclose(fp);
+    long double usage = (recv2-recv1) / 1000.0 +(send2-send1)/1000.0;
+	return usage;
+}
+
+int App:: GPU_util()
+{
+	nvmlReturn_t result;
+    unsigned int device_count,utilization;
+
+    result = nvmlInit();
+    if (result != NVML_SUCCESS)
+        return 1;
+    
+    result = nvmlDeviceGetCount(&device_count);
+    if (result != NVML_SUCCESS)
+        return 2;
+
+    for (int i = 0; i < device_count; ++i) {
+        nvmlDevice_t device;
+        result = nvmlDeviceGetHandleByIndex(0, &device);
+        if (result != NVML_SUCCESS)
+            return 3;
+
+        char device_name[NVML_DEVICE_NAME_BUFFER_SIZE];
+        result = nvmlDeviceGetName(device, device_name, NVML_DEVICE_NAME_BUFFER_SIZE);
+        if (result != NVML_SUCCESS)
+            return 4;
+
+        //std::printf("DenvmlDeviceGetNamevice %d: %s\n", i, device_name);
+
+        nvmlUtilization_st device_utilization;
+        result = nvmlDeviceGetUtilizationRates(device, &device_utilization);
+
+        if (result != NVML_SUCCESS)
+            return 5;
+
+        //std::printf("GPU Util: %u, Mem Util: %u\n", device_utilization.gpu, device_utilization.memory);
+		utilization = device_utilization.gpu;
+        std::printf("GPU Util: %u\n",device_utilization.gpu);
+    }
+    nvmlShutdown();
+    return utilization;
+}
+
+ void * pthread_usage(void *threadid)
+ {
+    while (1)
+	{
+       //theApp->GPU_util = GPU_util();
+	   networkusage = theApp->getNetworkBandwidth();
+	}
+ }
+
+/*******************************************************************************
+	System Rendering
+*******************************************************************************/
 
 int App::run(int argc, char **argv)
 {
@@ -75,7 +156,7 @@ int App::run(int argc, char **argv)
 	int client = 0, pid;
 	while(1)
 	{
-	  string port,utilRate;
+	  string port,utilRate,networkRate;
 	 if ((client = accept(sockfd, (struct sockaddr *) &clientaddr, &clientlen)) < 0) {
 		LOG("Failed to accept client connection\n");
 		exit(1);
@@ -84,7 +165,9 @@ int App::run(int argc, char **argv)
       portno+=1; 
 	  port=toString(portno);
 	  utilRate=toString(util);
-	  char* info = (char*)(port+","+utilRate).c_str();
+	  networkRate=toString((int)networkusage);
+	  LOG("network usage %d\n",(int)networkusage);
+	  char* info = (char*)(port+","+utilRate+","+networkRate).c_str();
       pid = fork();
 	  if (pid < 0) {
               LOG("ERROR in new process creation\n");
@@ -120,45 +203,6 @@ int App::run(int argc, char **argv)
 	return 0;
 }
 
-int App:: GPU_util()
-{
-	nvmlReturn_t result;
-    unsigned int device_count,utilization;
-
-    result = nvmlInit();
-    if (result != NVML_SUCCESS)
-        return 1;
-    
-    result = nvmlDeviceGetCount(&device_count);
-    if (result != NVML_SUCCESS)
-        return 2;
-
-    for (int i = 0; i < device_count; ++i) {
-        nvmlDevice_t device;
-        result = nvmlDeviceGetHandleByIndex(0, &device);
-        if (result != NVML_SUCCESS)
-            return 3;
-
-        char device_name[NVML_DEVICE_NAME_BUFFER_SIZE];
-        result = nvmlDeviceGetName(device, device_name, NVML_DEVICE_NAME_BUFFER_SIZE);
-        if (result != NVML_SUCCESS)
-            return 4;
-
-        //std::printf("DenvmlDeviceGetNamevice %d: %s\n", i, device_name);
-
-        nvmlUtilization_st device_utilization;
-        result = nvmlDeviceGetUtilizationRates(device, &device_utilization);
-
-        if (result != NVML_SUCCESS)
-            return 5;
-
-        //std::printf("GPU Util: %u, Mem Util: %u\n", device_utilization.gpu, device_utilization.memory);
-		utilization = device_utilization.gpu;
-        std::printf("GPU Util: %u\n",device_utilization.gpu);
-    }
-    nvmlShutdown();
-    return utilization;
-}
 
 /*******************************************************************************
 	Entry if invoked as capture (shared library)
@@ -215,7 +259,8 @@ bool App::run_shared(string src)
 			exit(1) ;
 		}	
 		//set TCP options 
-		int one = 1,portno,util;
+		int one = 1,portno;
+		vector<int> util;
 
 		setsockopt(s, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
 		setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
@@ -225,7 +270,7 @@ bool App::run_shared(string src)
 		int c = connect(s, res->ai_addr, res->ai_addrlen);
         int count = 0;
 
-		bzero(buffer,256);
+		bzero(buffer,1024);
         
 		//LOG("connection %d\n",c);
 	    if(c < 0) {
@@ -236,33 +281,35 @@ bool App::run_shared(string src)
 			continue;
 		}
         
-		LOG("address:%s, port number:%d\n",addr.c_str(),port);
-        n = read(s,buffer,255);
+        n = read(s,buffer,1023);
         if (n < 0) 
 		{
          LOG("ERROR reading from socket");
 		 continue;
 		}
+		//LOG("buffer values:%s\n",buffer);
         phase = strtok(buffer,",");
 		while(phase)
 		{
+		 // LOG("phase:%s\n",phase);
 		  if(count==0)
 		  {
            portno = atoi(phase);
-           LOG("port number %d\n",portno);
 		   portNum.push_back(portno);
+		   //LOG("port number %d\n",portNum[i]);
 		  }
 		  else
 		  {
-			util = atoi(phase);
-			LOG("GPU util rate %d\n",util);
+			util.push_back(atoi(phase));
+			//LOG("util rate %d\n",util[count-1]);
 		  }
-		  phase = strtok (NULL, " ,");
+		  phase = strtok (NULL, ",");
 		  count++;
 		}
-		if(util<=50)
+		if(util[0]<=50&&util[1]<=50)
 		{
 			index = i;
+			//LOG("port number %d,%d\n",index,portNum.size());
 			break;
 		}		
 	}
@@ -301,6 +348,11 @@ void App::init(bool shared, const char *id)
    // portNum.ClearAll();
 	bHasInit = true;
 	index = 0;
+    int rc = pthread_create(&tid, NULL, pthread_usage, (void *)0);
+	if (rc){
+		printf("ERROR; return code from pthread_create() is %d\n", rc);
+		exit(-1);
+	}
 }
 
 

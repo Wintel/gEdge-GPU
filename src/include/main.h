@@ -26,6 +26,9 @@
 #include <time.h>
 #include <nvml.h>
 #include <SDL/SDL.h>
+#include <sys/time.h>
+#include <unistd.h>
+
 #pragma comment(lib,"nvml");
 
 
@@ -58,6 +61,8 @@ public:
 	//called when we're invoked from the command line
 	int run(int argc, char **argv);
 	int index;
+	pthread_t tid ;
+	
 	
 	vector<Module *> mModules;
 	vector<int> portNum;
@@ -67,6 +72,8 @@ public:
 	bool run_shared(string src);
 
 	int GPU_util();
+
+	long double getNetworkBandwidth();
 
 	bool tick();
 
@@ -78,6 +85,7 @@ extern bool bIsIntercept;
 
 //Global config instance
 extern Config *gConfig;
+
 
 //App *theApp = NULL;
 

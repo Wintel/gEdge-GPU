@@ -13,8 +13,8 @@
 
 #include <fcntl.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <string>
+#include <unistd.h>
 #define PORT 8080
 
 typedef void (*ExecFunc)(byte *buf);
@@ -33,10 +33,6 @@ bool glFrustumUsage = true;
 bool bezelCompensation = true;
 
 
-/*******************************************************************************
-	send photos
-*******************************************************************************/
- 
 
 /*******************************************************************************
 	Module
@@ -51,6 +47,7 @@ ExecModule::ExecModule()
 		LOG("failed to make window!\n");
 		exit(1);
 	}
+
 
 }
 
@@ -214,6 +211,18 @@ void pushRet(const GLubyte *val)
 	mCurrentInstruction->buffers[currentBuffer].needReply = true;
 }
 
+static double
+current_time(void)
+{
+   struct timeval tv;
+#ifdef __VMS
+   (void) gettimeofday(&tv, NULL );
+#else
+   struct timezone tz;
+   (void) gettimeofday(&tv, &tz);
+#endif
+   return (double) tv.tv_sec + tv.tv_usec / 1000000.0;
+}
 
 void pushRet(const GLchar * val)
 {
@@ -288,9 +297,31 @@ static void EXEC_glFlush(byte *commandbuf)
 //1499
 static void EXEC_CGLSwapBuffers(byte *commandbuf)
 {
+	static int frames = 0,time=0;
+	static double tRate0 = -1.0;
+	double t = current_time();
+	
 	//printf("SWAP\n");
 	SDL_GL_SwapBuffers();
 	Stats::increment("Rendered frames");
+	frames++;
+	if(tRate0 <0.0)
+	 tRate0 = t;
+	if(t-tRate0 >=5.0)
+	{
+		GLfloat seconds = t- tRate0;
+		GLfloat fps = frames / seconds;
+		LOG("%d frames in %3.1f seconds = %6.3f FPS\n", frames, seconds, fps);
+		tRate0 = t;
+		frames =0;
+		if(fps>(GLfloat)60)
+		{
+		 time=1;
+		 LOG("%d time,%6.3f FPS\n",time,fps);
+		}
+	}
+	if(time)
+	  usleep(5000);
 	//int bpp = 1;   
     //if(format == GL_BGR || format == GL_RGB) bpp = 3;
     //else if(format == GL_RGBA || format == GL_BGRA) bpp = 4;
