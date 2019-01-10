@@ -48,7 +48,6 @@ ExecModule::ExecModule()
 		exit(1);
 	}
 
-
 }
 
 
@@ -318,6 +317,10 @@ static void EXEC_CGLSwapBuffers(byte *commandbuf)
 		{
 		 time=1;
 		 LOG("%d time,%6.3f FPS\n",time,fps);
+		}
+		else
+		{
+			time =0;
 		}
 	}
 	if(time)
@@ -2859,7 +2862,7 @@ static void EXEC_glReadPixels(byte *commandbuf)
 	//LOG("glReadPixels %d %d %d %d %d %d\n", *x, *y, *width, *height,*format,*type);
 	GLubyte * pixel_data = (GLubyte*)popBuf();
 	glReadPixels(*x, *y, *width, *height, GL_BGR, *type,pixel_data);
-    //create_ppm("tmp", nscreenshots, *width, *height, 255, 3, pixel_data);
+    create_ppm("tmp", nscreenshots, *width, *height, 255, 3, pixel_data);
 
 
 	nscreenshots++;

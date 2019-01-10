@@ -306,7 +306,7 @@ bool App::run_shared(string src)
 		  phase = strtok (NULL, ",");
 		  count++;
 		}
-		if(util[0]<=50&&util[1]<=50)
+		if(util[0]<=90&&util[1]<=90)
 		{
 			index = i;
 			//LOG("port number %d,%d\n",index,portNum.size());

@@ -1,5 +1,5 @@
 num=$1
-cmdPath=/home/dongjitang/clustergl-master_multiserver/runtime
+cmdPath=/home/dongjitang/clustergl-master_multiserver_network/runtime
 run_sh=${cmdPath}/run.sh
 run_client_sh=${cmdPath}/run_client.sh
 cd $cmdPath
