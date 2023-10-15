@@ -1,8 +1,8 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
 #include <GL/glut.h>
@@ -12,22 +12,16 @@
 
 int main_w, w1, w2, w3, w4;
 
-void
-display(void)
-{
+void display(void) {
   glClear(GL_COLOR_BUFFER_BIT);
   glFlush();
 }
 
-void
-vis(int visState)
-{
+void vis(int visState) {
   printf("VIS: win=%d, v=%d\n", glutGetWindow(), visState);
 }
 
-void
-reshape(int w, int h)
-{
+void reshape(int w, int h) {
   int width = 50;
   int height = 50;
 
@@ -56,9 +50,7 @@ reshape(int w, int h)
   glutReshapeWindow(width, height);
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB);
   glutInitWindowSize(210, 210);
@@ -84,5 +76,5 @@ main(int argc, char **argv)
   glutVisibilityFunc(vis);
   glClearColor(1.0, 1.0, 0.0, 1.0);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

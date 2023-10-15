@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -47,25 +47,19 @@
 
 /* This program is based on the GLUT scene.c program. */
 
-#include <stdlib.h>
 #include <GL/glut.h>
+#include <stdlib.h>
 
 int sbwin, dbwin;
 int angle;
 
 /*  Initialize material property and light source.  */
-void
-myinit(void)
-{
-  GLfloat light_ambient[] =
-  {0.3, 0.3, 0.3, 1.0};
-  GLfloat light_diffuse[] =
-  {6.0, 6.0, 6.0, 1.0};
-  GLfloat light_specular[] =
-  {1.0, 1.0, 1.0, 1.0};
+void myinit(void) {
+  GLfloat light_ambient[] = {0.3, 0.3, 0.3, 1.0};
+  GLfloat light_diffuse[] = {6.0, 6.0, 6.0, 1.0};
+  GLfloat light_specular[] = {1.0, 1.0, 1.0, 1.0};
   /* light_position is NOT default value */
-  GLfloat light_position[] =
-  {-1.0, 1.0, 1.0, 0.0};
+  GLfloat light_position[] = {-1.0, 1.0, 1.0, 0.0};
 
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
@@ -78,15 +72,10 @@ myinit(void)
   glEnable(GL_LIGHTING);
 }
 
-void
-display(void)
-{
-  static GLfloat red[] =
-  {0.8, 0.0, 0.0, 1.0};
-  static GLfloat yellow[] =
-  {0.8, 0.8, 0.0, 1.0};
-  static GLfloat green[] =
-  {0.0, 0.8, 0.0, 1.0};
+void display(void) {
+  static GLfloat red[] = {0.8, 0.0, 0.0, 1.0};
+  static GLfloat yellow[] = {0.8, 0.8, 0.0, 1.0};
+  static GLfloat green[] = {0.0, 0.8, 0.0, 1.0};
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -127,17 +116,15 @@ display(void)
 /* Used by both windows, this routine setups the OpenGL context's
    projection matrix correctly.  Note that we call this routine for
    both contexts to keep them in sync after reshapes. */
-void
-reshapeOpenGLState(int w, int h)
-{
+void reshapeOpenGLState(int w, int h) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   if (w <= h)
-    glOrtho(-2.5, 2.5, -2.5 * (GLfloat) h / (GLfloat) w,
-      2.5 * (GLfloat) h / (GLfloat) w, -10.0, 10.0);
+    glOrtho(-2.5, 2.5, -2.5 * (GLfloat)h / (GLfloat)w,
+            2.5 * (GLfloat)h / (GLfloat)w, -10.0, 10.0);
   else
-    glOrtho(-2.5 * (GLfloat) w / (GLfloat) h,
-      2.5 * (GLfloat) w / (GLfloat) h, -2.5, 2.5, -10.0, 10.0);
+    glOrtho(-2.5 * (GLfloat)w / (GLfloat)h, 2.5 * (GLfloat)w / (GLfloat)h, -2.5,
+            2.5, -10.0, 10.0);
   glMatrixMode(GL_MODELVIEW);
 }
 
@@ -148,9 +135,7 @@ reshapeOpenGLState(int w, int h)
    since the window's size won't really be changed until the double buffered
    gets its dbReshape callback.  Otherwise, you could trick OpenGL intop
    clipping based on the old window size. */
-void
-sbReshape(int w, int h)
-{
+void sbReshape(int w, int h) {
   glutSetWindow(sbwin);
   glViewport(0, 0, w, h);
   reshapeOpenGLState(w, h);
@@ -158,48 +143,42 @@ sbReshape(int w, int h)
   glutReshapeWindow(w, h);
 }
 
-void
-dbReshape(int w, int h)
-{
+void dbReshape(int w, int h) {
   glViewport(0, 0, w, h);
   reshapeOpenGLState(w, h);
 }
 
-void
-rotation(void)
-{
+void rotation(void) {
   angle += 2;
   angle = angle % 360;
   glutPostRedisplay();
 }
 
-int animation = 0;  /* Are we doing an animated rotation currently? */
+int animation = 0; /* Are we doing an animated rotation currently? */
 
-void
-main_menu(int value)
-{
+void main_menu(int value) {
   switch (value) {
   case 1:
     /* Smart toggle rotation ensures we switch to double buffered when
        animating and single buffered when not animating. */
-    animation = 1 - animation;  /* Toggle. */
+    animation = 1 - animation; /* Toggle. */
     if (animation) {
       glutIdleFunc(rotation);
       glutSetWindow(sbwin);
       glutSetWindowTitle("sb2db - double buffer mode");
       glutSetWindow(dbwin);
-      glutShowWindow();   /* Show the double buffered window. */
+      glutShowWindow(); /* Show the double buffered window. */
     } else {
       glutIdleFunc(NULL);
       glutSetWindow(sbwin);
       glutSetWindowTitle("sb2db - single buffer mode");
       glutSetWindow(dbwin);
-      glutHideWindow();   /* Hide the double buffered window. */
+      glutHideWindow(); /* Hide the double buffered window. */
     }
     break;
   case 2:
     glutSetWindow(dbwin);
-    glutHideWindow();   /* Hide the double buffered window. */
+    glutHideWindow(); /* Hide the double buffered window. */
     glutSetWindow(sbwin);
     glutSetWindowTitle("sb2db - single buffer mode");
     break;
@@ -207,10 +186,10 @@ main_menu(int value)
     glutSetWindow(sbwin);
     glutSetWindowTitle("sb2db - double buffer mode");
     glutSetWindow(dbwin);
-    glutShowWindow();   /* Show the double buffered window. */
+    glutShowWindow(); /* Show the double buffered window. */
     break;
   case 4:
-    animation = 1 - animation;  /* Toggle. */
+    animation = 1 - animation; /* Toggle. */
     if (animation)
       glutIdleFunc(rotation);
     else
@@ -224,9 +203,7 @@ main_menu(int value)
 
 /* You have to track the visibility of both the single buffered
    and double buffered windows together. */
-void
-visibility(int state)
-{
+void visibility(int state) {
   static int sbvis = GLUT_NOT_VISIBLE, dbvis = GLUT_NOT_VISIBLE;
   int eithervis;
 
@@ -248,9 +225,7 @@ visibility(int state)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   glutInitWindowSize(500, 500);
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_SINGLE);
@@ -266,8 +241,8 @@ main(int argc, char **argv)
      when displaying double buffered and hide it to show the
      single buffered window. */
   glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
-  dbwin = glutCreateSubWindow(glutGetWindow(),
-    0, 0, glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
+  dbwin = glutCreateSubWindow(glutGetWindow(), 0, 0, glutGet(GLUT_WINDOW_WIDTH),
+                              glutGet(GLUT_WINDOW_HEIGHT));
   glutDisplayFunc(display);
   glutReshapeFunc(dbReshape);
   glutVisibilityFunc(visibility);
@@ -293,5 +268,5 @@ main(int argc, char **argv)
   glutSetWindow(sbwin);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

@@ -1,33 +1,25 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
-#include <string.h>
 #include <GL/glut.h>
+#include <string.h>
 
 void *font = GLUT_BITMAP_TIMES_ROMAN_24;
-void *fonts[] =
-{
-  GLUT_BITMAP_9_BY_15,
-  GLUT_BITMAP_TIMES_ROMAN_10,
-  GLUT_BITMAP_TIMES_ROMAN_24
-};
+void *fonts[] = {GLUT_BITMAP_9_BY_15, GLUT_BITMAP_TIMES_ROMAN_10,
+                 GLUT_BITMAP_TIMES_ROMAN_24};
 char defaultMessage[] = "GLUT means OpenGL.";
 char *message = defaultMessage;
 
-void
-selectFont(int newfont)
-{
+void selectFont(int newfont) {
   font = fonts[newfont];
   glutPostRedisplay();
 }
 
-void
-selectMessage(int msg)
-{
+void selectMessage(int msg) {
   switch (msg) {
   case 1:
     message = "abcdefghijklmnop";
@@ -38,9 +30,7 @@ selectMessage(int msg)
   }
 }
 
-void
-selectColor(int color)
-{
+void selectColor(int color) {
   switch (color) {
   case 1:
     glColor3f(0.0, 1.0, 0.0);
@@ -55,27 +45,19 @@ selectColor(int color)
   glutPostRedisplay();
 }
 
-void
-tick(void)
-{
-  glutPostRedisplay();
-}
+void tick(void) { glutPostRedisplay(); }
 
-void
-output(int x, int y, char *string)
-{
+void output(int x, int y, char *string) {
   int len, i;
 
   glRasterPos2f(x, y);
-  len = (int) strlen(string);
+  len = (int)strlen(string);
   for (i = 0; i < len; i++) {
     glutBitmapCharacter(font, string[i]);
   }
 }
 
-void
-display(void)
-{
+void display(void) {
   glClear(GL_COLOR_BUFFER_BIT);
   output(0, 24, "This is written in a GLUT bitmap font.");
   output(100, 100, message);
@@ -83,9 +65,7 @@ display(void)
   glutSwapBuffers();
 }
 
-void
-reshape(int w, int h)
-{
+void reshape(int w, int h) {
   glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -93,9 +73,7 @@ reshape(int w, int h)
   glMatrixMode(GL_MODELVIEW);
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int i, msg_submenu, color_submenu;
 
   glutInit(&argc, argv);
@@ -126,5 +104,5 @@ main(int argc, char **argv)
   glutAddSubMenu("Color", color_submenu);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

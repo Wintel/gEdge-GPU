@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, 1994, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -38,11 +38,11 @@
  * OpenGL(TM) is a trademark of Silicon Graphics, Inc.
  */
 
+#include <GL/glut.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <GL/glut.h>
 
 /* Some <math.h> files do not define M_PI... */
 #ifndef M_PI
@@ -50,15 +50,15 @@
 #endif
 
 #ifdef WIN32
-#define drand48() (((float) rand())/((float) RAND_MAX))
+#define drand48() (((float)rand()) / ((float)RAND_MAX))
 #define srand48(x) (srand((x)))
 #else
 extern double drand48(void);
 extern void srand48(long seedval);
 #endif
 
-#define XSIZE   100
-#define YSIZE   75
+#define XSIZE 100
+#define YSIZE 75
 
 #define RINGS 5
 #define BLUERING 0
@@ -69,16 +69,7 @@ extern void srand48(long seedval);
 
 #define BACKGROUND 8
 
-enum {
-  BLACK = 0,
-  RED,
-  GREEN,
-  YELLOW,
-  BLUE,
-  MAGENTA,
-  CYAN,
-  WHITE
-};
+enum { BLACK = 0, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE };
 
 typedef short Point[2];
 
@@ -93,9 +84,7 @@ float rotAxis[RINGS][3];
 int iters[RINGS];
 GLuint theTorus;
 
-void
-FillTorus(float rc, int numc, float rt, int numt)
-{
+void FillTorus(float rc, int numc, float rt, int numt) {
   int i, j, k;
   double s, t;
   double x, y, z;
@@ -126,9 +115,7 @@ FillTorus(float rc, int numc, float rt, int numt)
   }
 }
 
-float
-Clamp(int iters_left, float t)
-{
+float Clamp(int iters_left, float t) {
 
   if (iters_left < 3) {
     return 0.0;
@@ -136,9 +123,7 @@ Clamp(int iters_left, float t)
   return (iters_left - 2) * t / iters_left;
 }
 
-void
-Idle(void)
-{
+void Idle(void) {
   int i, j;
   int more = GL_FALSE;
 
@@ -159,9 +144,7 @@ Idle(void)
   }
 }
 
-void
-DrawScene(void)
-{
+void DrawScene(void) {
   int i;
 
   glPushMatrix();
@@ -177,7 +160,7 @@ DrawScene(void)
     }
     glPushMatrix();
     glTranslatef(dests[i][0] + offsets[i][0], dests[i][1] + offsets[i][1],
-      dests[i][2] + offsets[i][2]);
+                 dests[i][2] + offsets[i][2]);
     glRotatef(angs[i], rotAxis[i][0], rotAxis[i][1], rotAxis[i][2]);
     glCallList(theTorus);
     glPopMatrix();
@@ -191,15 +174,9 @@ DrawScene(void)
   }
 }
 
-float
-MyRand(void)
-{
-  return 10.0 * (drand48() - 0.5);
-}
+float MyRand(void) { return 10.0 * (drand48() - 0.5); }
 
-void
-ReInit(void)
-{
+void ReInit(void) {
   int i;
   float deviation;
 
@@ -217,37 +194,24 @@ ReInit(void)
   }
 }
 
-void
-Init(void)
-{
+void Init(void) {
   int i;
   float top_y = 1.0;
   float bottom_y = 0.0;
   float top_z = 0.15;
   float bottom_z = 0.69;
   float spacing = 2.5;
-  static float lmodel_ambient[] =
-  {0.0, 0.0, 0.0, 0.0};
-  static float lmodel_twoside[] =
-  {GL_FALSE};
-  static float lmodel_local[] =
-  {GL_FALSE};
-  static float light0_ambient[] =
-  {0.1, 0.1, 0.1, 1.0};
-  static float light0_diffuse[] =
-  {1.0, 1.0, 1.0, 0.0};
-  static float light0_position[] =
-  {0.8660254, 0.5, 1, 0};
-  static float light0_specular[] =
-  {1.0, 1.0, 1.0, 0.0};
-  static float bevel_mat_ambient[] =
-  {0.0, 0.0, 0.0, 1.0};
-  static float bevel_mat_shininess[] =
-  {40.0};
-  static float bevel_mat_specular[] =
-  {1.0, 1.0, 1.0, 0.0};
-  static float bevel_mat_diffuse[] =
-  {1.0, 0.0, 0.0, 0.0};
+  static float lmodel_ambient[] = {0.0, 0.0, 0.0, 0.0};
+  static float lmodel_twoside[] = {GL_FALSE};
+  static float lmodel_local[] = {GL_FALSE};
+  static float light0_ambient[] = {0.1, 0.1, 0.1, 1.0};
+  static float light0_diffuse[] = {1.0, 1.0, 1.0, 0.0};
+  static float light0_position[] = {0.8660254, 0.5, 1, 0};
+  static float light0_specular[] = {1.0, 1.0, 1.0, 0.0};
+  static float bevel_mat_ambient[] = {0.0, 0.0, 0.0, 1.0};
+  static float bevel_mat_shininess[] = {40.0};
+  static float bevel_mat_specular[] = {1.0, 1.0, 1.0, 0.0};
+  static float bevel_mat_diffuse[] = {1.0, 0.0, 0.0, 0.0};
 
   srand48(0x102342);
   ReInit();
@@ -326,16 +290,10 @@ Init(void)
   glMatrixMode(GL_MODELVIEW);
 }
 
-void
-Reshape(int width, int height)
-{
-  glViewport(0, 0, width, height);
-}
+void Reshape(int width, int height) { glViewport(0, 0, width, height); }
 
 /* ARGSUSED1 */
-void
-Key(unsigned char key, int x, int y)
-{
+void Key(unsigned char key, int x, int y) {
 
   switch (key) {
   case 27:
@@ -348,9 +306,7 @@ Key(unsigned char key, int x, int y)
   }
 }
 
-GLenum
-Args(int argc, char **argv)
-{
+GLenum Args(int argc, char **argv) {
   GLint i;
 
   rgb = GL_TRUE;
@@ -373,9 +329,7 @@ Args(int argc, char **argv)
   return GL_TRUE;
 }
 
-void
-visible(int vis)
-{
+void visible(int vis) {
   if (vis == GLUT_VISIBLE) {
     glutIdleFunc(Idle);
   } else {
@@ -383,9 +337,7 @@ visible(int vis)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   GLenum type;
 
   glutInitWindowSize(400, 300);
@@ -408,5 +360,5 @@ main(int argc, char **argv)
   glutVisibilityFunc(visible);
 
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

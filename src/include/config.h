@@ -1,78 +1,77 @@
 /*******************************************************************************
-	Runtime configuration
+        Runtime configuration
 *******************************************************************************/
-class Config{
+class Config {
 public:
-    Config(string filename, string id);
-        
-/*******************************************************************************
-	Rendering output config
-*******************************************************************************/
-	
-	//The id of this node. We look for a config file section with this name
-	//id is set on the command line on startup
-	string id;
+  Config(string filename, string id);
 
-	//Size of this renderer
-    int sizeX;
-    int sizeY;
-    
-	//Position on screen of this renderer
-    int positionX;
-    int positionY;
-    
-    //The position of this renderer inside the total screen size
-    int offsetX;
-    int offsetY;
-    
-    //for VIEWMODE_CURVE
-    int angle;
-                
-    //Size of the entire viewport
-    int totalWidth;
-    int totalHeight;
-        
-    int screenWidth;
-    int screenGap;
-    
-    int syncRate;
-    bool enableStats;
-    
-    float scaleX;
-    float scaleY;
-    
-    int clientPort;
-        
-    int viewMode;
-    string viewModeString;
-    
-    int networkCompression;
-    
-/*******************************************************************************
-	Capture configuration
-*******************************************************************************/
-	int serverPort;
-	
-	string interceptMode;
-	
-    //Size of the client window    
-    int fakeWindowX;
-    int fakeWindowY;
-	    
-    //Location of renderers. Automatically calculated
-    int numOutputs;    
-	vector<string> outputAddresses;
-	vector<int> outputPorts;
-	
-	string capturePidFile;
+  /*******************************************************************************
+          Rendering output config
+  *******************************************************************************/
 
+  // The id of this node. We look for a config file section with this name
+  // id is set on the command line on startup
+  string id;
 
-/*******************************************************************************
-    Offset remote configuration
-*******************************************************************************/
-    bool remoteConfigServerEnabled;
+  // Size of this renderer
+  int sizeX;
+  int sizeY;
 
-    void startRemoteConfigServer();
+  // Position on screen of this renderer
+  int positionX;
+  int positionY;
+
+  // The position of this renderer inside the total screen size
+  int offsetX;
+  int offsetY;
+
+  // for VIEWMODE_CURVE
+  int angle;
+
+  // Size of the entire viewport
+  int totalWidth;
+  int totalHeight;
+
+  int screenWidth;
+  int screenGap;
+
+  int syncRate;
+  bool enableStats;
+
+  float scaleX;
+  float scaleY;
+
+  int clientPort;
+
+  int viewMode;
+  string viewModeString;
+
+  int networkCompression;
+
+  /*******************************************************************************
+          Capture configuration
+  *******************************************************************************/
+  int serverPort;
+
+  string interceptMode;
+
+  // Size of the client window
+  int fakeWindowX;
+  int fakeWindowY;
+
+  // Location of renderers. Automatically calculated
+  int numOutputs;
+  vector<string> outputAddresses;
+  vector<int> outputPorts;
+
+  string capturePidFile;
+
+  /*******************************************************************************
+      Offset remote configuration
+  *******************************************************************************/
+  bool remoteConfigServerEnabled;
+
+  void startRemoteConfigServer();
 };
 
 /*

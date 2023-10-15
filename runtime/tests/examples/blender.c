@@ -1,8 +1,8 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
 /* blender renders two spinning icosahedrons (red and green).
@@ -11,27 +11,19 @@
    text in a stroke font: one line antialiased, the other not.  */
 
 #include <GL/glut.h>
-#include <stdio.h>
 #include <math.h>
+#include <stdio.h>
 
-GLfloat light0_ambient[] =
-{0.2, 0.2, 0.2, 1.0};
-GLfloat light0_diffuse[] =
-{0.0, 0.0, 0.0, 1.0};
-GLfloat light1_diffuse[] =
-{1.0, 0.0, 0.0, 1.0};
-GLfloat light1_position[] =
-{1.0, 1.0, 1.0, 0.0};
-GLfloat light2_diffuse[] =
-{0.0, 1.0, 0.0, 1.0};
-GLfloat light2_position[] =
-{-1.0, -1.0, 1.0, 0.0};
+GLfloat light0_ambient[] = {0.2, 0.2, 0.2, 1.0};
+GLfloat light0_diffuse[] = {0.0, 0.0, 0.0, 1.0};
+GLfloat light1_diffuse[] = {1.0, 0.0, 0.0, 1.0};
+GLfloat light1_position[] = {1.0, 1.0, 1.0, 0.0};
+GLfloat light2_diffuse[] = {0.0, 1.0, 0.0, 1.0};
+GLfloat light2_position[] = {-1.0, -1.0, 1.0, 0.0};
 float s = 0.0;
 GLfloat angle1 = 0.0, angle2 = 0.0;
 
-void 
-output(GLfloat x, GLfloat y, char *text)
-{
+void output(GLfloat x, GLfloat y, char *text) {
   char *p;
 
   glPushMatrix();
@@ -41,13 +33,9 @@ output(GLfloat x, GLfloat y, char *text)
   glPopMatrix();
 }
 
-void 
-display(void)
-{
-  static GLfloat amb[] =
-  {0.4, 0.4, 0.4, 0.0};
-  static GLfloat dif[] =
-  {1.0, 1.0, 1.0, 0.0};
+void display(void) {
+  static GLfloat amb[] = {0.4, 0.4, 0.4, 0.0};
+  static GLfloat dif[] = {1.0, 1.0, 1.0, 0.0};
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_LIGHT1);
@@ -59,7 +47,7 @@ display(void)
   glPushMatrix();
   glTranslatef(-0.3, -0.3, 0.0);
   glRotatef(angle1, 1.0, 5.0, 0.0);
-  glCallList(1);        /* render ico display list */
+  glCallList(1); /* render ico display list */
   glPopMatrix();
 
   glClear(GL_DEPTH_BUFFER_BIT);
@@ -72,7 +60,7 @@ display(void)
   glPushMatrix();
   glTranslatef(0.3, 0.3, 0.0);
   glRotatef(angle2, 1.0, 0.0, 5.0);
-  glCallList(1);        /* render ico display list */
+  glCallList(1); /* render ico display list */
   glPopMatrix();
 
   glPushAttrib(GL_ENABLE_BIT);
@@ -100,34 +88,28 @@ display(void)
   glutSwapBuffers();
 }
 
-void 
-idle(void)
-{
-  angle1 = (GLfloat) fmod(angle1 + 0.8, 360.0);
-  angle2 = (GLfloat) fmod(angle2 + 1.1, 360.0);
+void idle(void) {
+  angle1 = (GLfloat)fmod(angle1 + 0.8, 360.0);
+  angle2 = (GLfloat)fmod(angle2 + 1.1, 360.0);
   s += 0.05;
   glutPostRedisplay();
 }
 
-void 
-visible(int vis)
-{
+void visible(int vis) {
   if (vis == GLUT_VISIBLE)
     glutIdleFunc(idle);
   else
     glutIdleFunc(NULL);
 }
 
-int 
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glutCreateWindow("blender");
   glutDisplayFunc(display);
   glutVisibilityFunc(visible);
 
-  glNewList(1, GL_COMPILE);  /* create ico display list */
+  glNewList(1, GL_COMPILE); /* create ico display list */
   glutSolidIcosahedron();
   glEndList();
 
@@ -147,15 +129,15 @@ main(int argc, char **argv)
   glLineWidth(2.0);
 
   glMatrixMode(GL_PROJECTION);
-  gluPerspective( /* field of view in degree */ 40.0,
-  /* aspect ratio */ 1.0,
-    /* Z near */ 1.0, /* Z far */ 10.0);
+  gluPerspective(/* field of view in degree */ 40.0,
+                 /* aspect ratio */ 1.0,
+                 /* Z near */ 1.0, /* Z far */ 10.0);
   glMatrixMode(GL_MODELVIEW);
-  gluLookAt(0.0, 0.0, 5.0,  /* eye is at (0,0,5) */
-    0.0, 0.0, 0.0,      /* center is at (0,0,0) */
-    0.0, 1.0, 0.);      /* up is in positive Y direction */
+  gluLookAt(0.0, 0.0, 5.0, /* eye is at (0,0,5) */
+            0.0, 0.0, 0.0, /* center is at (0,0,0) */
+            0.0, 1.0, 0.); /* up is in positive Y direction */
   glTranslatef(0.0, 0.6, -1.0);
 
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

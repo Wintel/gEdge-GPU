@@ -1,20 +1,20 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
 /**
  * (c) Copyright 1993, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -28,8 +28,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -44,19 +44,19 @@
 /*
  *  scene.c
  *  This program demonstrates the use of the GL lighting model.
- *  Objects are drawn using a grey material characteristic. 
+ *  Objects are drawn using a grey material characteristic.
  *  A single light source illuminates the objects.
  */
-#include <stdlib.h>
+#include <GL/glut.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <GL/glut.h>
+#include <stdlib.h>
 
 #define BUFSIZE 512
 
-#define TORUS		1
-#define TETRAHEDRON	2
-#define ICOSAHEDRON	3
+#define TORUS 1
+#define TETRAHEDRON 2
+#define ICOSAHEDRON 3
 
 GLuint selectBuf[BUFSIZE];
 
@@ -67,12 +67,9 @@ int theObject = 0;
 int menu_inuse = 0;
 int mouse_state = 0;
 
-char *objectNames[] =
-{"Nothing", "Torus", "Tetrahedron", "Icosahedron"};
+char *objectNames[] = {"Nothing", "Torus", "Tetrahedron", "Icosahedron"};
 
-void
-output(GLfloat x, GLfloat y, char *format,...)
-{
+void output(GLfloat x, GLfloat y, char *format, ...) {
   va_list args;
   char buffer[200], *p;
 
@@ -87,17 +84,11 @@ output(GLfloat x, GLfloat y, char *format,...)
 }
 
 /* Initialize material property and light source. */
-void
-myinit(void)
-{
-  GLfloat light_ambient[] =
-  {0.2, 0.2, 0.2, 1.0};
-  GLfloat light_diffuse[] =
-  {1.0, 1.0, 1.0, 1.0};
-  GLfloat light_specular[] =
-  {1.0, 1.0, 1.0, 1.0};
-  GLfloat light_position[] =
-  {1.0, 1.0, 1.0, 0.0};
+void myinit(void) {
+  GLfloat light_ambient[] = {0.2, 0.2, 0.2, 1.0};
+  GLfloat light_diffuse[] = {1.0, 1.0, 1.0, 1.0};
+  GLfloat light_specular[] = {1.0, 1.0, 1.0, 1.0};
+  GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};
 
   glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
@@ -122,26 +113,17 @@ myinit(void)
   glEndList();
 }
 
-void
-highlightBegin(void)
-{
-  static GLfloat red[4] =
-  {1.0, 0.0, 0.0, 1.0};
+void highlightBegin(void) {
+  static GLfloat red[4] = {1.0, 0.0, 0.0, 1.0};
 
   glPushAttrib(GL_LIGHTING_BIT | GL_CURRENT_BIT);
   glMaterialfv(GL_FRONT, GL_DIFFUSE, red);
   glColor3f(1.0, 0.0, 0.0);
 }
 
-void
-highlightEnd(void)
-{
-  glPopAttrib();
-}
+void highlightEnd(void) { glPopAttrib(); }
 
-void
-draw(void)
-{
+void draw(void) {
   glPushMatrix();
   glScalef(1.3, 1.3, 1.3);
   glRotatef(20.0, 1.0, 0.0, 0.0);
@@ -181,48 +163,44 @@ draw(void)
   glPopMatrix();
 }
 
-void
-myortho(void)
-{
+void myortho(void) {
   if (W <= H)
-    glOrtho(-2.5, 2.5, -2.5 * (GLfloat) H / (GLfloat) W,
-      2.5 * (GLfloat) H / (GLfloat) W, -10.0, 10.0);
+    glOrtho(-2.5, 2.5, -2.5 * (GLfloat)H / (GLfloat)W,
+            2.5 * (GLfloat)H / (GLfloat)W, -10.0, 10.0);
   else
-    glOrtho(-2.5 * (GLfloat) W / (GLfloat) H,
-      2.5 * (GLfloat) W / (GLfloat) H, -2.5, 2.5, -10.0, 10.0);
+    glOrtho(-2.5 * (GLfloat)W / (GLfloat)H, 2.5 * (GLfloat)W / (GLfloat)H, -2.5,
+            2.5, -10.0, 10.0);
 }
 
-/*  processHits() prints out the contents of the 
+/*  processHits() prints out the contents of the
  *  selection array.
  */
-void
-processHits(GLint hits, GLuint buffer[])
-{
+void processHits(GLint hits, GLuint buffer[]) {
   GLuint depth = ~0;
   unsigned int i, getThisName;
   GLuint names, *ptr;
   GLuint newObject;
 
-  ptr = (GLuint *) buffer;
+  ptr = (GLuint *)buffer;
   newObject = 0;
-  for (i = 0; i < hits; i++) {  /* for each hit  */
+  for (i = 0; i < hits; i++) { /* for each hit  */
     getThisName = 0;
     names = *ptr;
-    ptr++;              /* skip # name */
+    ptr++; /* skip # name */
     if (*ptr <= depth) {
       depth = *ptr;
       getThisName = 1;
     }
-    ptr++;              /* skip z1 */
+    ptr++; /* skip z1 */
     if (*ptr <= depth) {
       depth = *ptr;
       getThisName = 1;
     }
-    ptr++;              /* skip z2 */
+    ptr++; /* skip z2 */
 
     if (getThisName)
       newObject = *ptr;
-    ptr += names;       /* skip the names list */
+    ptr += names; /* skip the names list */
   }
   if (theObject != newObject) {
     theObject = newObject;
@@ -231,15 +209,13 @@ processHits(GLint hits, GLuint buffer[])
 }
 
 /* ARGSUSED */
-void
-locate(int value)
-{
+void locate(int value) {
   GLint viewport[4];
   GLint hits;
 
   if (locating) {
     if (mouse_state == GLUT_ENTERED) {
-      (void) glRenderMode(GL_SELECT);
+      (void)glRenderMode(GL_SELECT);
       glInitNames();
       glPushName(-1);
 
@@ -266,9 +242,7 @@ locate(int value)
   locating = 0;
 }
 
-void
-passive(int newx, int newy)
-{
+void passive(int newx, int newy) {
   x = newx;
   y = newy;
   if (!locating) {
@@ -277,9 +251,7 @@ passive(int newx, int newy)
   }
 }
 
-void
-entry(int state)
-{
+void entry(int state) {
   mouse_state = state;
   if (!menu_inuse) {
     if (state == GLUT_LEFT) {
@@ -291,9 +263,7 @@ entry(int state)
   }
 }
 
-void
-display(void)
-{
+void display(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   draw();
 
@@ -320,9 +290,7 @@ display(void)
   glutSwapBuffers();
 }
 
-void
-myReshape(int w, int h)
-{
+void myReshape(int w, int h) {
   W = w;
   H = h;
   glViewport(0, 0, W, H);
@@ -332,9 +300,7 @@ myReshape(int w, int h)
   glMatrixMode(GL_MODELVIEW);
 }
 
-void
-polygon_mode(int value)
-{
+void polygon_mode(int value) {
   switch (value) {
   case 1:
     glEnable(GL_LIGHTING);
@@ -355,9 +321,7 @@ polygon_mode(int value)
   glutPostRedisplay();
 }
 
-void
-mstatus(int status, int newx, int newy)
-{
+void mstatus(int status, int newx, int newy) {
   if (status == GLUT_MENU_NOT_IN_USE) {
     menu_inuse = 0;
     passive(newx, newy);
@@ -366,20 +330,16 @@ mstatus(int status, int newx, int newy)
   }
 }
 
-void
-main_menu(int value)
-{
+void main_menu(int value) {
   if (value == 666)
     exit(0);
 }
 
 /*  Main Loop
- *  Open window with initial window size, title bar, 
+ *  Open window with initial window size, title bar,
  *  RGBA display mode, and handle input events.
  */
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int submenu;
 
   glutInit(&argc, argv);
@@ -400,5 +360,5 @@ main(int argc, char **argv)
   glutEntryFunc(entry);
   glutMenuStatusFunc(mstatus);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

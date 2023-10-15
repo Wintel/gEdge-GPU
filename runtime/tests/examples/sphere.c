@@ -1,22 +1,20 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
 /* Don't take this program too seriously.  It is just a hack. */
 
-#include <stdlib.h>
-#include <stdio.h>
+#include <GL/glut.h>
 #include <ctype.h>
 #include <math.h>
-#include <GL/glut.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-GLfloat light_diffuse[] =
-{1.0, 0.0, 0.0, 1.0};
-GLfloat light_position[] =
-{1.0, 1.0, 1.0, 0.0};
+GLfloat light_diffuse[] = {1.0, 0.0, 0.0, 1.0};
+GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};
 GLUquadricObj *qobj;
 
 int win1, win2, submenu1, submenu2;
@@ -25,32 +23,25 @@ int list = 1;
 
 float thetime = 0.0;
 
-void
-display(void)
-{
+void display(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   if (glutGetWindow() == win1) {
-    glCallList(list);   /* render sphere display list */
+    glCallList(list); /* render sphere display list */
   } else {
-    glCallList(1);      /* render sphere display list */
+    glCallList(1); /* render sphere display list */
   }
   glutSwapBuffers();
 }
 
-void
-display_win1(void)
-{
+void display_win1(void) {
   glPushMatrix();
   glTranslatef(0.0, 0.0, -1 - 2 * sin(thetime));
   display();
   glPopMatrix();
 }
 
-void
-idle(void)
-{
-  GLfloat light_position[] =
-  {1.0, 1.0, 1.0, 0.0};
+void idle(void) {
+  GLfloat light_position[] = {1.0, 1.0, 1.0, 0.0};
 
   glutSetWindow(win1);
   thetime += 0.05;
@@ -60,15 +51,9 @@ idle(void)
 }
 
 /* ARGSUSED */
-void
-delayed_stop(int value)
-{
-  glutIdleFunc(NULL);
-}
+void delayed_stop(int value) { glutIdleFunc(NULL); }
 
-void
-it(int value)
-{
+void it(int value) {
   glutDestroyWindow(glutGetWindow());
   printf("menu selection: win=%d, menu=%d\n", glutGetWindow(), glutGetMenu());
   switch (value) {
@@ -101,20 +86,20 @@ it(int value)
   }
 }
 
-void
-init(void)
-{
+void init(void) {
   gluQuadricDrawStyle(qobj, GLU_FILL);
-  glNewList(1, GL_COMPILE);  /* create sphere display list */
-  gluSphere(qobj, /* radius */ 1.0, /* slices */ 20,  /* stacks 
+  glNewList(1, GL_COMPILE); /* create sphere display list */
+  gluSphere(qobj, /* radius */ 1.0, /* slices */ 20, /* stacks
 
-                                                       */ 20);
+                                                      */
+            20);
   glEndList();
   gluQuadricDrawStyle(qobj, GLU_LINE);
-  glNewList(2, GL_COMPILE);  /* create sphere display list */
-  gluSphere(qobj, /* radius */ 1.0, /* slices */ 20,  /* stacks 
+  glNewList(2, GL_COMPILE); /* create sphere display list */
+  gluSphere(qobj, /* radius */ 1.0, /* slices */ 20, /* stacks
 
-                                                       */ 20);
+                                                      */
+            20);
   glEndList();
   glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
   glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -122,27 +107,23 @@ init(void)
   glEnable(GL_LIGHT0);
   glEnable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
-  gluPerspective( /* field of view in degree */ 40.0,
-  /* aspect ratio */ 1.0,
-    /* Z near */ 1.0, /* Z far */ 10.0);
+  gluPerspective(/* field of view in degree */ 40.0,
+                 /* aspect ratio */ 1.0,
+                 /* Z near */ 1.0, /* Z far */ 10.0);
   glMatrixMode(GL_MODELVIEW);
-  gluLookAt(0.0, 0.0, 5.0,  /* eye is at (0,0,5) */
-    0.0, 0.0, 0.0,      /* center is at (0,0,0) */
-    0.0, 1.0, 0.);      /* up is in positive Y direction */
+  gluLookAt(0.0, 0.0, 5.0, /* eye is at (0,0,5) */
+            0.0, 0.0, 0.0, /* center is at (0,0,0) */
+            0.0, 1.0, 0.); /* up is in positive Y direction */
   glTranslatef(0.0, 0.0, -1.0);
 }
 
-void
-menustate(int inuse)
-{
+void menustate(int inuse) {
   printf("menu is %s\n", inuse ? "INUSE" : "not in use");
   if (!inuse) {
   }
 }
 
-void
-keyboard(unsigned char key, int x, int y)
-{
+void keyboard(unsigned char key, int x, int y) {
   if (isprint(key)) {
     printf("key: `%c' %d,%d\n", key, x, y);
   } else {
@@ -150,9 +131,7 @@ keyboard(unsigned char key, int x, int y)
   }
 }
 
-void
-special(int key, int x, int y)
-{
+void special(int key, int x, int y) {
   char *name;
 
   switch (key) {
@@ -223,35 +202,23 @@ special(int key, int x, int y)
   printf("special: %s %d,%d\n", name, x, y);
 }
 
-void
-mouse(int button, int state, int x, int y)
-{
-  printf("button: %d %s %d,%d\n", button, state == GLUT_UP ? "UP" : "down", x, y);
+void mouse(int button, int state, int x, int y) {
+  printf("button: %d %s %d,%d\n", button, state == GLUT_UP ? "UP" : "down", x,
+         y);
 }
 
-void
-motion(int x, int y)
-{
-  printf("motion: %d,%d\n", x, y);
-}
+void motion(int x, int y) { printf("motion: %d,%d\n", x, y); }
 
-void
-visible(int status)
-{
+void visible(int status) {
   printf("visible: %s\n", status == GLUT_VISIBLE ? "YES" : "no");
 }
 
-void
-enter_leave(int state)
-{
-  printf("enter/leave %d = %s\n",
-    glutGetWindow(),
-    state == GLUT_LEFT ? "left" : "entered");
+void enter_leave(int state) {
+  printf("enter/leave %d = %s\n", glutGetWindow(),
+         state == GLUT_LEFT ? "left" : "entered");
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   qobj = gluNewQuadric();
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
@@ -298,5 +265,5 @@ main(int argc, char **argv)
   glutAttachMenu(GLUT_LEFT_BUTTON);
   glutMenuStateFunc(menustate);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

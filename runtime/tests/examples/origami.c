@@ -1,13 +1,13 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <GL/glut.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /* Uses EXT_polygon_offset extension if available to better
    render the fold outlines. */
@@ -17,14 +17,14 @@ int polygon_offset;
 #endif
 
 enum {
-  FLAT,                 /* completely flat sheet of paper */
-  FLAP1,                /* left flap being folded in */
-  FLAP2,                /* right flap being folded int */
-  CENTER2,              /* right side folded up at center */
-  WING2,                /* right wing folded down */
-  CENTER1,              /* left side folded up at center */
-  WING1,                /* left wing folded down */
-  FOLDED                /* fully folded paper airplane */
+  FLAT,    /* completely flat sheet of paper */
+  FLAP1,   /* left flap being folded in */
+  FLAP2,   /* right flap being folded int */
+  CENTER2, /* right side folded up at center */
+  WING2,   /* right wing folded down */
+  CENTER1, /* left side folded up at center */
+  WING1,   /* left wing folded down */
+  FOLDED   /* fully folded paper airplane */
 } States;
 
 int motion = 1;
@@ -69,71 +69,23 @@ These correspond to the polygons for the paper sections:
 
 typedef GLfloat Point[2];
 
-Point poly1[] =
-{
-  {-1, 0},
-  {-1 / 3.0, 2 / 3.0},
-  {-1, 2 / 3.0}
-};
+Point poly1[] = {{-1, 0}, {-1 / 3.0, 2 / 3.0}, {-1, 2 / 3.0}};
 
-Point poly2[] =
-{
-  {-1, 1},
-  {-1, 2 / 3.0},
-  {-1 / 3.0, 2 / 3.0},
-  {0, 1}
-};
+Point poly2[] = {{-1, 1}, {-1, 2 / 3.0}, {-1 / 3.0, 2 / 3.0}, {0, 1}};
 
-Point poly3[] =
-{
-  {0, 1},
-  {1, 1},
-  {1, 2 / 3.0},
-  {1 / 3.0, 2 / 3.0}
-};
+Point poly3[] = {{0, 1}, {1, 1}, {1, 2 / 3.0}, {1 / 3.0, 2 / 3.0}};
 
-Point poly4[] =
-{
-  {1 / 3.0, 2 / 3.0},
-  {1, 2 / 3.0},
-  {1, 0}
-};
+Point poly4[] = {{1 / 3.0, 2 / 3.0}, {1, 2 / 3.0}, {1, 0}};
 
-Point poly5[] =
-{
-  {-1 / 3.0, 2 / 3.0},
-  {0, 1},
-  {0, -1.5},
-  {-1 / 3.0, -1.5}
-};
+Point poly5[] = {{-1 / 3.0, 2 / 3.0}, {0, 1}, {0, -1.5}, {-1 / 3.0, -1.5}};
 
-Point poly6[] =
-{
-  {0, 1},
-  {1 / 3.0, 2 / 3.0},
-  {1 / 3.0, -1.5},
-  {0, -1.5}
-};
+Point poly6[] = {{0, 1}, {1 / 3.0, 2 / 3.0}, {1 / 3.0, -1.5}, {0, -1.5}};
 
-Point poly7[] =
-{
-  {-1, 0},
-  {-1 / 3.0, 2 / 3.0},
-  {-1 / 3.0, -1.5},
-  {-1, -1.5}
-};
+Point poly7[] = {{-1, 0}, {-1 / 3.0, 2 / 3.0}, {-1 / 3.0, -1.5}, {-1, -1.5}};
 
-Point poly8[] =
-{
-  {1, 0},
-  {1 / 3.0, 2 / 3.0},
-  {1 / 3.0, -1.5},
-  {1, -1.5}
-};
+Point poly8[] = {{1, 0}, {1 / 3.0, 2 / 3.0}, {1 / 3.0, -1.5}, {1, -1.5}};
 
-void
-polydlist(int dlist, int num, Point points[])
-{
+void polydlist(int dlist, int num, Point points[]) {
   int i;
 
   glNewList(dlist, GL_COMPILE);
@@ -145,9 +97,7 @@ polydlist(int dlist, int num, Point points[])
   glEndList();
 }
 
-void
-idle(void)
-{
+void idle(void) {
   if (spinning)
     click++;
   switch (state) {
@@ -221,71 +171,66 @@ idle(void)
   glutPostRedisplay();
 }
 
-void
-draw_folded_plane(void)
-{
+void draw_folded_plane(void) {
   /* *INDENT-OFF* */
   glPushMatrix();
-    glRotatef(click, 0, 0, 1);
-    glRotatef(click / 5.0, 0, 1, 0);
-    glTranslatef(0, .25, 0);
-    glPushMatrix();
-      glRotatef(center1_angle, 0, 1, 0);
-      glPushMatrix();
-        glTranslatef(-.5, .5, 0);
-        glRotatef(flap1_angle, 1, 1, 0);
-        glTranslatef(.5, -.5, 0);
-        glCallList(2);
-      glPopMatrix();
-      glCallList(5);
+  glRotatef(click, 0, 0, 1);
+  glRotatef(click / 5.0, 0, 1, 0);
+  glTranslatef(0, .25, 0);
+  glPushMatrix();
+  glRotatef(center1_angle, 0, 1, 0);
+  glPushMatrix();
+  glTranslatef(-.5, .5, 0);
+  glRotatef(flap1_angle, 1, 1, 0);
+  glTranslatef(.5, -.5, 0);
+  glCallList(2);
+  glPopMatrix();
+  glCallList(5);
 
-      glPushMatrix();
-        glTranslatef(-1 / 3.0, 0, 0);
-        glRotatef(-wing1_angle, 0, 1, 0);
-        glTranslatef(1 / 3.0, 0, 0);
+  glPushMatrix();
+  glTranslatef(-1 / 3.0, 0, 0);
+  glRotatef(-wing1_angle, 0, 1, 0);
+  glTranslatef(1 / 3.0, 0, 0);
 
-        glCallList(7);
-        glPushMatrix();
-          glTranslatef(-.5, .5, 0);
-          glRotatef(flap1_angle, 1, 1, 0);
-          glTranslatef(.5, -.5, 0);
-          glCallList(1);
-        glPopMatrix();
-      glPopMatrix();
-    glPopMatrix();
+  glCallList(7);
+  glPushMatrix();
+  glTranslatef(-.5, .5, 0);
+  glRotatef(flap1_angle, 1, 1, 0);
+  glTranslatef(.5, -.5, 0);
+  glCallList(1);
+  glPopMatrix();
+  glPopMatrix();
+  glPopMatrix();
 
-    glPushMatrix();
-      glRotatef(-center2_angle, 0, 1, 0);
-      glPushMatrix();
-        glTranslatef(.5, .5, 0);
-        glRotatef(-flap2_angle, -1, 1, 0);
-        glTranslatef(-.5, -.5, 0);
-        glCallList(3);
-      glPopMatrix();
-      glCallList(6);
+  glPushMatrix();
+  glRotatef(-center2_angle, 0, 1, 0);
+  glPushMatrix();
+  glTranslatef(.5, .5, 0);
+  glRotatef(-flap2_angle, -1, 1, 0);
+  glTranslatef(-.5, -.5, 0);
+  glCallList(3);
+  glPopMatrix();
+  glCallList(6);
 
-      glPushMatrix();
-        glTranslatef(1 / 3.0, 0, 0);
-        glRotatef(wing2_angle, 0, 1, 0);
-        glTranslatef(-1 / 3.0, 0, 0);
+  glPushMatrix();
+  glTranslatef(1 / 3.0, 0, 0);
+  glRotatef(wing2_angle, 0, 1, 0);
+  glTranslatef(-1 / 3.0, 0, 0);
 
-        glCallList(8);
-        glPushMatrix();
-          glTranslatef(.5, .5, 0);
-          glRotatef(-flap2_angle, -1, 1, 0);
-          glTranslatef(-.5, -.5, 0);
-          glCallList(4);
-        glPopMatrix();
-      glPopMatrix();
-    glPopMatrix();
+  glCallList(8);
+  glPushMatrix();
+  glTranslatef(.5, .5, 0);
+  glRotatef(-flap2_angle, -1, 1, 0);
+  glTranslatef(-.5, -.5, 0);
+  glCallList(4);
+  glPopMatrix();
+  glPopMatrix();
+  glPopMatrix();
   glPopMatrix();
   /* *INDENT-ON* */
-
 }
 
-void
-display(void)
-{
+void display(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   glColor3ub(67, 205, 128);
@@ -324,9 +269,7 @@ display(void)
   glutSwapBuffers();
 }
 
-void
-visible(int state)
-{
+void visible(int state) {
   if (state == GLUT_VISIBLE) {
     if (motion)
       glutIdleFunc(idle);
@@ -335,9 +278,7 @@ visible(int state)
   }
 }
 
-void
-menu(int value)
-{
+void menu(int value) {
   switch (value) {
   case 1:
     direction = -direction;
@@ -363,9 +304,7 @@ menu(int value)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DEPTH | GLUT_DOUBLE);
   glutCreateWindow("origami");
@@ -375,9 +314,7 @@ main(int argc, char **argv)
   glMatrixMode(GL_PROJECTION);
   gluPerspective(40.0, 1.0, 0.1, 10.0);
   glMatrixMode(GL_MODELVIEW);
-  gluLookAt(0, 0, 5.5,
-    0, 0, 0,
-    0, 1, 0);
+  gluLookAt(0, 0, 5.5, 0, 0, 0, 0, 1, 0);
   glEnable(GL_DEPTH_TEST);
   glDepthFunc(GL_LEQUAL);
   glLineWidth(2.0);
@@ -399,5 +336,5 @@ main(int argc, char **argv)
   polygon_offset = glutExtensionSupported("GL_EXT_polygon_offset");
 #endif
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

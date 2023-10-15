@@ -25,21 +25,18 @@
  *	escape	quit
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
 #include <GL/glut.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define W 600
 #define H 600
 
-float z_axis[] =
-{0.0, 0.0, 1.0};
+float z_axis[] = {0.0, 0.0, 1.0};
 
-void
-norm(float v[3])
-{
+void norm(float v[3]) {
   float r;
 
   r = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
@@ -49,17 +46,13 @@ norm(float v[3])
   v[2] /= r;
 }
 
-void
-cross(float v1[3], float v2[3], float result[3])
-{
+void cross(float v1[3], float v2[3], float result[3]) {
   result[0] = v1[1] * v2[2] - v1[2] * v2[1];
   result[1] = v1[2] * v2[0] - v1[0] * v2[2];
   result[2] = v1[0] * v2[1] - v1[1] * v2[0];
 }
 
-float
-length(float v[3])
-{
+float length(float v[3]) {
   float r = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
   return r;
 }
@@ -83,97 +76,93 @@ int vsegments = 4;
 int spindx, spindy;
 int startx, starty;
 int curx, cury;
-int prevx, prevy;       /* to get good deltas using glut */
+int prevx, prevy; /* to get good deltas using glut */
 
 void redraw(void);
 void createlists(void);
 
 /* Control points of the torus in Bezier form.  Can be rendered
    using OpenGL evaluators. */
-static GLfloat torusbezierpts[] =
-{
-/* *INDENT-OFF* */
-   4.0, 0.0, 0.0, 4.0, 2.0, 0.0, 1.0, 2.0, 3.0, 0.0, 1.0, 2.0,
-   3.0, 0.0, 1.0, 2.0, 4.0, 0.0, 1.0, 2.0, 8.0, 0.0, 0.0, 4.0,
-   8.0, 0.0, 0.0, 4.0, 4.0, 0.0,-1.0, 2.0, 3.0, 0.0,-1.0, 2.0,
-   3.0, 0.0,-1.0, 2.0, 2.0, 0.0,-1.0, 2.0, 4.0, 0.0, 0.0, 4.0,
-   2.0,-2.0, 0.0, 2.0, 1.0,-1.0, 0.5, 1.0, 1.5,-1.5, 0.5, 1.0,
-   1.5,-1.5, 0.5, 1.0, 2.0,-2.0, 0.5, 1.0, 4.0,-4.0, 0.0, 2.0,
-   4.0,-4.0, 0.0, 2.0, 2.0,-2.0,-0.5, 1.0, 1.5,-1.5,-0.5, 1.0,
-   1.5,-1.5,-0.5, 1.0, 1.0,-1.0,-0.5, 1.0, 2.0,-2.0, 0.0, 2.0,
-   0.0,-2.0, 0.0, 2.0, 0.0,-1.0, 0.5, 1.0, 0.0,-1.5, 0.5, 1.0,
-   0.0,-1.5, 0.5, 1.0, 0.0,-2.0, 0.5, 1.0, 0.0,-4.0, 0.0, 2.0,
-   0.0,-4.0, 0.0, 2.0, 0.0,-2.0,-0.5, 1.0, 0.0,-1.5,-0.5, 1.0,
-   0.0,-1.5,-0.5, 1.0, 0.0,-1.0,-0.5, 1.0, 0.0,-2.0, 0.0, 2.0,
-   0.0,-2.0, 0.0, 2.0, 0.0,-1.0, 0.5, 1.0, 0.0,-1.5, 0.5, 1.0,
-   0.0,-1.5, 0.5, 1.0, 0.0,-2.0, 0.5, 1.0, 0.0,-4.0, 0.0, 2.0,
-   0.0,-4.0, 0.0, 2.0, 0.0,-2.0,-0.5, 1.0, 0.0,-1.5,-0.5, 1.0,
-   0.0,-1.5,-0.5, 1.0, 0.0,-1.0,-0.5, 1.0, 0.0,-2.0, 0.0, 2.0,
-  -2.0,-2.0, 0.0, 2.0,-1.0,-1.0, 0.5, 1.0,-1.5,-1.5, 0.5, 1.0,
-  -1.5,-1.5, 0.5, 1.0,-2.0,-2.0, 0.5, 1.0,-4.0,-4.0, 0.0, 2.0,
-  -4.0,-4.0, 0.0, 2.0,-2.0,-2.0,-0.5, 1.0,-1.5,-1.5,-0.5, 1.0,
-  -1.5,-1.5,-0.5, 1.0,-1.0,-1.0,-0.5, 1.0,-2.0,-2.0, 0.0, 2.0,
-  -4.0, 0.0, 0.0, 4.0,-2.0, 0.0, 1.0, 2.0,-3.0, 0.0, 1.0, 2.0,
-  -3.0, 0.0, 1.0, 2.0,-4.0, 0.0, 1.0, 2.0,-8.0, 0.0, 0.0, 4.0,
-  -8.0, 0.0, 0.0, 4.0,-4.0, 0.0,-1.0, 2.0,-3.0, 0.0,-1.0, 2.0,
-  -3.0, 0.0,-1.0, 2.0,-2.0, 0.0,-1.0, 2.0,-4.0, 0.0, 0.0, 4.0,
-  -4.0, 0.0, 0.0, 4.0,-2.0, 0.0, 1.0, 2.0,-3.0, 0.0, 1.0, 2.0,
-  -3.0, 0.0, 1.0, 2.0,-4.0, 0.0, 1.0, 2.0,-8.0, 0.0, 0.0, 4.0,
-  -8.0, 0.0, 0.0, 4.0,-4.0, 0.0,-1.0, 2.0,-3.0, 0.0,-1.0, 2.0,
-  -3.0, 0.0,-1.0, 2.0,-2.0, 0.0,-1.0, 2.0,-4.0, 0.0, 0.0, 4.0,
-  -2.0, 2.0, 0.0, 2.0,-1.0, 1.0, 0.5, 1.0,-1.5, 1.5, 0.5, 1.0,
-  -1.5, 1.5, 0.5, 1.0,-2.0, 2.0, 0.5, 1.0,-4.0, 4.0, 0.0, 2.0,
-  -4.0, 4.0, 0.0, 2.0,-2.0, 2.0,-0.5, 1.0,-1.5, 1.5,-0.5, 1.0,
-  -1.5, 1.5,-0.5, 1.0,-1.0, 1.0,-0.5, 1.0,-2.0, 2.0, 0.0, 2.0,
-   0.0, 2.0, 0.0, 2.0, 0.0, 1.0, 0.5, 1.0, 0.0, 1.5, 0.5, 1.0,
-   0.0, 1.5, 0.5, 1.0, 0.0, 2.0, 0.5, 1.0, 0.0, 4.0, 0.0, 2.0,
-   0.0, 4.0, 0.0, 2.0, 0.0, 2.0,-0.5, 1.0, 0.0, 1.5,-0.5, 1.0,
-   0.0, 1.5,-0.5, 1.0, 0.0, 1.0,-0.5, 1.0, 0.0, 2.0, 0.0, 2.0,
-   0.0, 2.0, 0.0, 2.0, 0.0, 1.0, 0.5, 1.0, 0.0, 1.5, 0.5, 1.0,
-   0.0, 1.5, 0.5, 1.0, 0.0, 2.0, 0.5, 1.0, 0.0, 4.0, 0.0, 2.0,
-   0.0, 4.0, 0.0, 2.0, 0.0, 2.0,-0.5, 1.0, 0.0, 1.5,-0.5, 1.0,
-   0.0, 1.5,-0.5, 1.0, 0.0, 1.0,-0.5, 1.0, 0.0, 2.0, 0.0, 2.0,
-   2.0, 2.0, 0.0, 2.0, 1.0, 1.0, 0.5, 1.0, 1.5, 1.5, 0.5, 1.0,
-   1.5, 1.5, 0.5, 1.0, 2.0, 2.0, 0.5, 1.0, 4.0, 4.0, 0.0, 2.0,
-   4.0, 4.0, 0.0, 2.0, 2.0, 2.0,-0.5, 1.0, 1.5, 1.5,-0.5, 1.0,
-   1.5, 1.5,-0.5, 1.0, 1.0, 1.0,-0.5, 1.0, 2.0, 2.0, 0.0, 2.0,
-   4.0, 0.0, 0.0, 4.0, 2.0, 0.0, 1.0, 2.0, 3.0, 0.0, 1.0, 2.0,
-   3.0, 0.0, 1.0, 2.0, 4.0, 0.0, 1.0, 2.0, 8.0, 0.0, 0.0, 4.0,
-   8.0, 0.0, 0.0, 4.0, 4.0, 0.0,-1.0, 2.0, 3.0, 0.0,-1.0, 2.0,
-   3.0, 0.0,-1.0, 2.0, 2.0, 0.0,-1.0, 2.0, 4.0, 0.0, 0.0, 4.0,
-/* *INDENT-ON* */
+static GLfloat torusbezierpts[] = {
+    /* *INDENT-OFF* */
+    4.0,  0.0,  0.0,  4.0, 2.0,  0.0,  1.0,  2.0, 3.0,  0.0,  1.0,  2.0,
+    3.0,  0.0,  1.0,  2.0, 4.0,  0.0,  1.0,  2.0, 8.0,  0.0,  0.0,  4.0,
+    8.0,  0.0,  0.0,  4.0, 4.0,  0.0,  -1.0, 2.0, 3.0,  0.0,  -1.0, 2.0,
+    3.0,  0.0,  -1.0, 2.0, 2.0,  0.0,  -1.0, 2.0, 4.0,  0.0,  0.0,  4.0,
+    2.0,  -2.0, 0.0,  2.0, 1.0,  -1.0, 0.5,  1.0, 1.5,  -1.5, 0.5,  1.0,
+    1.5,  -1.5, 0.5,  1.0, 2.0,  -2.0, 0.5,  1.0, 4.0,  -4.0, 0.0,  2.0,
+    4.0,  -4.0, 0.0,  2.0, 2.0,  -2.0, -0.5, 1.0, 1.5,  -1.5, -0.5, 1.0,
+    1.5,  -1.5, -0.5, 1.0, 1.0,  -1.0, -0.5, 1.0, 2.0,  -2.0, 0.0,  2.0,
+    0.0,  -2.0, 0.0,  2.0, 0.0,  -1.0, 0.5,  1.0, 0.0,  -1.5, 0.5,  1.0,
+    0.0,  -1.5, 0.5,  1.0, 0.0,  -2.0, 0.5,  1.0, 0.0,  -4.0, 0.0,  2.0,
+    0.0,  -4.0, 0.0,  2.0, 0.0,  -2.0, -0.5, 1.0, 0.0,  -1.5, -0.5, 1.0,
+    0.0,  -1.5, -0.5, 1.0, 0.0,  -1.0, -0.5, 1.0, 0.0,  -2.0, 0.0,  2.0,
+    0.0,  -2.0, 0.0,  2.0, 0.0,  -1.0, 0.5,  1.0, 0.0,  -1.5, 0.5,  1.0,
+    0.0,  -1.5, 0.5,  1.0, 0.0,  -2.0, 0.5,  1.0, 0.0,  -4.0, 0.0,  2.0,
+    0.0,  -4.0, 0.0,  2.0, 0.0,  -2.0, -0.5, 1.0, 0.0,  -1.5, -0.5, 1.0,
+    0.0,  -1.5, -0.5, 1.0, 0.0,  -1.0, -0.5, 1.0, 0.0,  -2.0, 0.0,  2.0,
+    -2.0, -2.0, 0.0,  2.0, -1.0, -1.0, 0.5,  1.0, -1.5, -1.5, 0.5,  1.0,
+    -1.5, -1.5, 0.5,  1.0, -2.0, -2.0, 0.5,  1.0, -4.0, -4.0, 0.0,  2.0,
+    -4.0, -4.0, 0.0,  2.0, -2.0, -2.0, -0.5, 1.0, -1.5, -1.5, -0.5, 1.0,
+    -1.5, -1.5, -0.5, 1.0, -1.0, -1.0, -0.5, 1.0, -2.0, -2.0, 0.0,  2.0,
+    -4.0, 0.0,  0.0,  4.0, -2.0, 0.0,  1.0,  2.0, -3.0, 0.0,  1.0,  2.0,
+    -3.0, 0.0,  1.0,  2.0, -4.0, 0.0,  1.0,  2.0, -8.0, 0.0,  0.0,  4.0,
+    -8.0, 0.0,  0.0,  4.0, -4.0, 0.0,  -1.0, 2.0, -3.0, 0.0,  -1.0, 2.0,
+    -3.0, 0.0,  -1.0, 2.0, -2.0, 0.0,  -1.0, 2.0, -4.0, 0.0,  0.0,  4.0,
+    -4.0, 0.0,  0.0,  4.0, -2.0, 0.0,  1.0,  2.0, -3.0, 0.0,  1.0,  2.0,
+    -3.0, 0.0,  1.0,  2.0, -4.0, 0.0,  1.0,  2.0, -8.0, 0.0,  0.0,  4.0,
+    -8.0, 0.0,  0.0,  4.0, -4.0, 0.0,  -1.0, 2.0, -3.0, 0.0,  -1.0, 2.0,
+    -3.0, 0.0,  -1.0, 2.0, -2.0, 0.0,  -1.0, 2.0, -4.0, 0.0,  0.0,  4.0,
+    -2.0, 2.0,  0.0,  2.0, -1.0, 1.0,  0.5,  1.0, -1.5, 1.5,  0.5,  1.0,
+    -1.5, 1.5,  0.5,  1.0, -2.0, 2.0,  0.5,  1.0, -4.0, 4.0,  0.0,  2.0,
+    -4.0, 4.0,  0.0,  2.0, -2.0, 2.0,  -0.5, 1.0, -1.5, 1.5,  -0.5, 1.0,
+    -1.5, 1.5,  -0.5, 1.0, -1.0, 1.0,  -0.5, 1.0, -2.0, 2.0,  0.0,  2.0,
+    0.0,  2.0,  0.0,  2.0, 0.0,  1.0,  0.5,  1.0, 0.0,  1.5,  0.5,  1.0,
+    0.0,  1.5,  0.5,  1.0, 0.0,  2.0,  0.5,  1.0, 0.0,  4.0,  0.0,  2.0,
+    0.0,  4.0,  0.0,  2.0, 0.0,  2.0,  -0.5, 1.0, 0.0,  1.5,  -0.5, 1.0,
+    0.0,  1.5,  -0.5, 1.0, 0.0,  1.0,  -0.5, 1.0, 0.0,  2.0,  0.0,  2.0,
+    0.0,  2.0,  0.0,  2.0, 0.0,  1.0,  0.5,  1.0, 0.0,  1.5,  0.5,  1.0,
+    0.0,  1.5,  0.5,  1.0, 0.0,  2.0,  0.5,  1.0, 0.0,  4.0,  0.0,  2.0,
+    0.0,  4.0,  0.0,  2.0, 0.0,  2.0,  -0.5, 1.0, 0.0,  1.5,  -0.5, 1.0,
+    0.0,  1.5,  -0.5, 1.0, 0.0,  1.0,  -0.5, 1.0, 0.0,  2.0,  0.0,  2.0,
+    2.0,  2.0,  0.0,  2.0, 1.0,  1.0,  0.5,  1.0, 1.5,  1.5,  0.5,  1.0,
+    1.5,  1.5,  0.5,  1.0, 2.0,  2.0,  0.5,  1.0, 4.0,  4.0,  0.0,  2.0,
+    4.0,  4.0,  0.0,  2.0, 2.0,  2.0,  -0.5, 1.0, 1.5,  1.5,  -0.5, 1.0,
+    1.5,  1.5,  -0.5, 1.0, 1.0,  1.0,  -0.5, 1.0, 2.0,  2.0,  0.0,  2.0,
+    4.0,  0.0,  0.0,  4.0, 2.0,  0.0,  1.0,  2.0, 3.0,  0.0,  1.0,  2.0,
+    3.0,  0.0,  1.0,  2.0, 4.0,  0.0,  1.0,  2.0, 8.0,  0.0,  0.0,  4.0,
+    8.0,  0.0,  0.0,  4.0, 4.0,  0.0,  -1.0, 2.0, 3.0,  0.0,  -1.0, 2.0,
+    3.0,  0.0,  -1.0, 2.0, 2.0,  0.0,  -1.0, 2.0, 4.0,  0.0,  0.0,  4.0,
+    /* *INDENT-ON* */
 
 };
 
 /* Control points of a torus in NURBS form.  Can be rendered using
    the GLU NURBS routines. */
-static GLfloat torusnurbpts[] =
-{
-/* *INDENT-OFF* */
-   4.0, 0.0, 0.0, 4.0, 2.0, 0.0, 1.0, 2.0, 4.0, 0.0, 1.0, 2.0,
-   8.0, 0.0, 0.0, 4.0, 4.0, 0.0,-1.0, 2.0, 2.0, 0.0,-1.0, 2.0,
-   4.0, 0.0, 0.0, 4.0, 2.0,-2.0, 0.0, 2.0, 1.0,-1.0, 0.5, 1.0,
-   2.0,-2.0, 0.5, 1.0, 4.0,-4.0, 0.0, 2.0, 2.0,-2.0,-0.5, 1.0,
-   1.0,-1.0,-0.5, 1.0, 2.0,-2.0, 0.0, 2.0,-2.0,-2.0, 0.0, 2.0,
-  -1.0,-1.0, 0.5, 1.0,-2.0,-2.0, 0.5, 1.0,-4.0,-4.0, 0.0, 2.0,
-  -2.0,-2.0,-0.5, 1.0,-1.0,-1.0,-0.5, 1.0,-2.0,-2.0, 0.0, 2.0,
-  -4.0, 0.0, 0.0, 4.0,-2.0, 0.0, 1.0, 2.0,-4.0, 0.0, 1.0, 2.0,
-  -8.0, 0.0, 0.0, 4.0,-4.0, 0.0,-1.0, 2.0,-2.0, 0.0,-1.0, 2.0,
-  -4.0, 0.0, 0.0, 4.0,-2.0, 2.0, 0.0, 2.0,-1.0, 1.0, 0.5, 1.0,
-  -2.0, 2.0, 0.5, 1.0,-4.0, 4.0, 0.0, 2.0,-2.0, 2.0,-0.5, 1.0,
-  -1.0, 1.0,-0.5, 1.0,-2.0, 2.0, 0.0, 2.0, 2.0, 2.0, 0.0, 2.0,
-   1.0, 1.0, 0.5, 1.0, 2.0, 2.0, 0.5, 1.0, 4.0, 4.0, 0.0, 2.0,
-   2.0, 2.0,-0.5, 1.0, 1.0, 1.0,-0.5, 1.0, 2.0, 2.0, 0.0, 2.0,
-   4.0, 0.0, 0.0, 4.0, 2.0, 0.0, 1.0, 2.0, 4.0, 0.0, 1.0, 2.0,
-   8.0, 0.0, 0.0, 4.0, 4.0, 0.0,-1.0, 2.0, 2.0, 0.0,-1.0, 2.0,
-   4.0, 0.0, 0.0, 4.0,
-/* *INDENT-ON* */
+static GLfloat torusnurbpts[] = {
+    /* *INDENT-OFF* */
+    4.0,  0.0,  0.0,  4.0, 2.0,  0.0,  1.0,  2.0, 4.0,  0.0,  1.0,  2.0,
+    8.0,  0.0,  0.0,  4.0, 4.0,  0.0,  -1.0, 2.0, 2.0,  0.0,  -1.0, 2.0,
+    4.0,  0.0,  0.0,  4.0, 2.0,  -2.0, 0.0,  2.0, 1.0,  -1.0, 0.5,  1.0,
+    2.0,  -2.0, 0.5,  1.0, 4.0,  -4.0, 0.0,  2.0, 2.0,  -2.0, -0.5, 1.0,
+    1.0,  -1.0, -0.5, 1.0, 2.0,  -2.0, 0.0,  2.0, -2.0, -2.0, 0.0,  2.0,
+    -1.0, -1.0, 0.5,  1.0, -2.0, -2.0, 0.5,  1.0, -4.0, -4.0, 0.0,  2.0,
+    -2.0, -2.0, -0.5, 1.0, -1.0, -1.0, -0.5, 1.0, -2.0, -2.0, 0.0,  2.0,
+    -4.0, 0.0,  0.0,  4.0, -2.0, 0.0,  1.0,  2.0, -4.0, 0.0,  1.0,  2.0,
+    -8.0, 0.0,  0.0,  4.0, -4.0, 0.0,  -1.0, 2.0, -2.0, 0.0,  -1.0, 2.0,
+    -4.0, 0.0,  0.0,  4.0, -2.0, 2.0,  0.0,  2.0, -1.0, 1.0,  0.5,  1.0,
+    -2.0, 2.0,  0.5,  1.0, -4.0, 4.0,  0.0,  2.0, -2.0, 2.0,  -0.5, 1.0,
+    -1.0, 1.0,  -0.5, 1.0, -2.0, 2.0,  0.0,  2.0, 2.0,  2.0,  0.0,  2.0,
+    1.0,  1.0,  0.5,  1.0, 2.0,  2.0,  0.5,  1.0, 4.0,  4.0,  0.0,  2.0,
+    2.0,  2.0,  -0.5, 1.0, 1.0,  1.0,  -0.5, 1.0, 2.0,  2.0,  0.0,  2.0,
+    4.0,  0.0,  0.0,  4.0, 2.0,  0.0,  1.0,  2.0, 4.0,  0.0,  1.0,  2.0,
+    8.0,  0.0,  0.0,  4.0, 4.0,  0.0,  -1.0, 2.0, 2.0,  0.0,  -1.0, 2.0,
+    4.0,  0.0,  0.0,  4.0,
+    /* *INDENT-ON* */
 
 };
 
-void
-move(int x, int y)
-{
+void move(int x, int y) {
   prevx = curx;
   prevy = cury;
   curx = x;
@@ -185,9 +174,7 @@ move(int x, int y)
   }
 }
 
-void
-button(int button, int state, int x, int y)
-{
+void button(int button, int state, int x, int y) {
   if (button != GLUT_LEFT_BUTTON)
     return;
   switch (state) {
@@ -199,7 +186,7 @@ button(int button, int state, int x, int y)
     tracking = GL_TRUE;
     break;
   case GLUT_UP:
-    /* 
+    /*
      * If user released the button while moving the mouse, keep
      * spinning.
      */
@@ -213,9 +200,7 @@ button(int button, int state, int x, int y)
 }
 
 /* Maintain a square window when resizing */
-void
-reshape(int width, int height)
-{
+void reshape(int width, int height) {
   int size;
   size = (width < height ? width : height);
   glViewport((width - size) / 2, (height - size) / 2, size, size);
@@ -223,17 +208,11 @@ reshape(int width, int height)
   glutPostRedisplay();
 }
 
-void
-gridmaterials(void)
-{
-  static float front_mat_diffuse[] =
-  {1.0, 1.0, 0.4, 1.0};
-  static float front_mat_ambient[] =
-  {0.1, 0.1, 0.1, 1.0};
-  static float back_mat_diffuse[] =
-  {1.0, 0.0, 0.0, 1.0};
-  static float back_mat_ambient[] =
-  {0.1, 0.1, 0.1, 1.0};
+void gridmaterials(void) {
+  static float front_mat_diffuse[] = {1.0, 1.0, 0.4, 1.0};
+  static float front_mat_ambient[] = {0.1, 0.1, 0.1, 1.0};
+  static float back_mat_diffuse[] = {1.0, 0.0, 0.0, 1.0};
+  static float back_mat_ambient[] = {0.1, 0.1, 0.1, 1.0};
 
   glMaterialfv(GL_FRONT, GL_DIFFUSE, front_mat_diffuse);
   glMaterialfv(GL_FRONT, GL_AMBIENT, front_mat_ambient);
@@ -241,17 +220,11 @@ gridmaterials(void)
   glMaterialfv(GL_BACK, GL_AMBIENT, back_mat_ambient);
 }
 
-void
-surfacematerials(void)
-{
-  static float front_mat_diffuse[] =
-  {0.2, 0.7, 0.4, 1.0};
-  static float front_mat_ambient[] =
-  {0.1, 0.1, 0.1, 1.0};
-  static float back_mat_diffuse[] =
-  {1.0, 1.0, 0.2, 1.0};
-  static float back_mat_ambient[] =
-  {0.1, 0.1, 0.1, 1.0};
+void surfacematerials(void) {
+  static float front_mat_diffuse[] = {0.2, 0.7, 0.4, 1.0};
+  static float front_mat_ambient[] = {0.1, 0.1, 0.1, 1.0};
+  static float back_mat_diffuse[] = {1.0, 1.0, 0.2, 1.0};
+  static float back_mat_ambient[] = {0.1, 0.1, 0.1, 1.0};
 
   glMaterialfv(GL_FRONT, GL_DIFFUSE, front_mat_diffuse);
   glMaterialfv(GL_FRONT, GL_AMBIENT, front_mat_ambient);
@@ -259,17 +232,11 @@ surfacematerials(void)
   glMaterialfv(GL_BACK, GL_AMBIENT, back_mat_ambient);
 }
 
-void
-init(void)
-{
-  static float ambient[] =
-  {0.0, 0.0, 0.0, 1.0};
-  static float diffuse[] =
-  {1.0, 1.0, 1.0, 1.0};
-  static float position[] =
-  {90.0, 90.0, -150.0, 0.0};
-  static float lmodel_ambient[] =
-  {1.0, 1.0, 1.0, 1.0};
+void init(void) {
+  static float ambient[] = {0.0, 0.0, 0.0, 1.0};
+  static float diffuse[] = {1.0, 1.0, 1.0, 1.0};
+  static float position[] = {90.0, 90.0, -150.0, 0.0};
+  static float lmodel_ambient[] = {1.0, 1.0, 1.0, 1.0};
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -298,7 +265,7 @@ init(void)
 #endif
 
   nobj = gluNewNurbsRenderer();
-#ifdef GLU_VERSION_1_1  /* New GLU 1.1 interface. */
+#ifdef GLU_VERSION_1_1 /* New GLU 1.1 interface. */
   gluNurbsProperty(nobj, GLU_SAMPLING_METHOD, GLU_DOMAIN_DISTANCE);
 #endif
 
@@ -307,9 +274,7 @@ init(void)
   createlists();
 }
 
-void
-drawmesh(void)
-{
+void drawmesh(void) {
   int i, j;
   float *p;
 
@@ -325,7 +290,7 @@ drawmesh(void)
       glPolygonOffsetEXT(factor, bias);
 #endif
       glMap2f(GL_MAP2_VERTEX_4, 0.0, 1.0, up2p, 3, 0.0, 1.0, vp2p, 3,
-        (void *) p);
+              (void *)p);
       if (showsurf) {
         surfacematerials();
         glEvalMesh2(GL_FILL, 0, usegments, 0, vsegments);
@@ -338,9 +303,7 @@ drawmesh(void)
   }
 }
 
-void
-redraw(void)
-{
+void redraw(void) {
   int dx, dy;
   float v[3], rot[3];
   float len, ang;
@@ -393,18 +356,14 @@ redraw(void)
   glutSwapBuffers();
 }
 
-static void
-usage(void)
-{
+static void usage(void) {
   printf("usage: surfgrid [-f]\n");
   exit(-1);
 }
 
 /* what to do when a menu item is selected. This function also handles
    keystroke events.  */
-void
-menu(int item)
-{
+void menu(int item) {
   switch (item) {
   case 'p':
 #if GL_EXT_polygon_offset
@@ -466,7 +425,7 @@ menu(int item)
     vsegments++;
     createlists();
     break;
-  case '\033':         /* ESC key: quit */
+  case '\033': /* ESC key: quit */
     exit(0);
     break;
   }
@@ -474,26 +433,18 @@ menu(int item)
 }
 
 /* ARGSUSED1 */
-void
-key(unsigned char key, int x, int y)
-{
-  menu((int) key);
-}
+void key(unsigned char key, int x, int y) { menu((int)key); }
 
-void
-animate(void)
-{
+void animate(void) {
   if (!tracking && (spindx != 0 || spindy != 0))
     glutPostRedisplay();
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int i;
 
-  glutInit(&argc, argv);  /* initialize glut, processing
-                             arguments */
+  glutInit(&argc, argv); /* initialize glut, processing
+                            arguments */
 
   for (i = 1; i < argc; i++) {
     if (argv[i][0] == '-') {
@@ -545,8 +496,8 @@ main(int argc, char **argv)
 #if GL_EXT_polygon_offset
   if (!glutExtensionSupported("GL_EXT_polygon_offset")) {
     printf("Warning: "
-      "GL_EXT_polygon_offset not supported on this machine... "
-      "trying anyway\n");
+           "GL_EXT_polygon_offset not supported on this machine... "
+           "trying anyway\n");
   }
 #else
   printf("Warning: not compiled with GL_EXT_polygon_offset support.\n");
@@ -554,16 +505,13 @@ main(int argc, char **argv)
 
   init();
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }
 
-float circleknots[] =
-{0.0, 0.0, 0.0, 0.25, 0.50, 0.50, 0.75, 1.0, 1.0, 1.0};
+float circleknots[] = {0.0, 0.0, 0.0, 0.25, 0.50, 0.50, 0.75, 1.0, 1.0, 1.0};
 
-void
-createlists(void)
-{
-#ifdef GLU_VERSION_1_1  /* New GLU 1.1 interface. */
+void createlists(void) {
+#ifdef GLU_VERSION_1_1 /* New GLU 1.1 interface. */
   gluNurbsProperty(nobj, GLU_U_STEP, (usegments - 1) * 4);
   gluNurbsProperty(nobj, GLU_V_STEP, (vsegments - 1) * 4);
 
@@ -572,8 +520,8 @@ createlists(void)
   glNewList(surflist, GL_COMPILE);
   surfacematerials();
   gluBeginSurface(nobj);
-  gluNurbsSurface(nobj, 10, circleknots, 10, circleknots,
-    4, 28, torusnurbpts, 3, 3, GL_MAP2_VERTEX_4);
+  gluNurbsSurface(nobj, 10, circleknots, 10, circleknots, 4, 28, torusnurbpts,
+                  3, 3, GL_MAP2_VERTEX_4);
   gluEndSurface(nobj);
   glEndList();
 
@@ -581,8 +529,8 @@ createlists(void)
   glNewList(gridlist, GL_COMPILE);
   gridmaterials();
   gluBeginSurface(nobj);
-  gluNurbsSurface(nobj, 10, circleknots, 10, circleknots,
-    4, 28, torusnurbpts, 3, 3, GL_MAP2_VERTEX_4);
+  gluNurbsSurface(nobj, 10, circleknots, 10, circleknots, 4, 28, torusnurbpts,
+                  3, 3, GL_MAP2_VERTEX_4);
   gluEndSurface(nobj);
   glEndList();
 }

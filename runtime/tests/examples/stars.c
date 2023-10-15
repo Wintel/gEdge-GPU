@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -38,25 +38,19 @@
  * OpenGL(TM) is a trademark of Silicon Graphics, Inc.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-#include <time.h>
 #include <GL/glut.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
-#undef PI               /* Some systems may have this defined. */
+#undef PI /* Some systems may have this defined. */
 #define PI 3.141592657
 
-enum {
-  NORMAL = 0,
-  WEIRD = 1
-};
+enum { NORMAL = 0, WEIRD = 1 };
 
-enum {
-  STREAK = 0,
-  CIRCLE = 1
-};
+enum { STREAK = 0, CIRCLE = 1 };
 
 #define MAXSTARS 400
 #define MAXPOS 10000
@@ -79,36 +73,28 @@ GLint nitro = 0;
 starRec stars[MAXSTARS];
 float sinTable[MAXANGLES];
 
-float
-Sin(float angle)
-{
-  return (sinTable[(GLint) angle]);
+float Sin(float angle) { return (sinTable[(GLint)angle]); }
+
+float Cos(float angle) {
+  return (sinTable[((GLint)angle + (MAXANGLES / 4)) % MAXANGLES]);
 }
 
-float
-Cos(float angle)
-{
-  return (sinTable[((GLint) angle + (MAXANGLES / 4)) % MAXANGLES]);
-}
-
-void
-NewStar(GLint n, GLint d)
-{
+void NewStar(GLint n, GLint d) {
   if (rand() % 4 == 0) {
     stars[n].type = CIRCLE;
   } else {
     stars[n].type = STREAK;
   }
-  stars[n].x[0] = (float) (rand() % MAXPOS - MAXPOS / 2);
-  stars[n].y[0] = (float) (rand() % MAXPOS - MAXPOS / 2);
-  stars[n].z[0] = (float) (rand() % MAXPOS + d);
+  stars[n].x[0] = (float)(rand() % MAXPOS - MAXPOS / 2);
+  stars[n].y[0] = (float)(rand() % MAXPOS - MAXPOS / 2);
+  stars[n].z[0] = (float)(rand() % MAXPOS + d);
   stars[n].x[1] = stars[n].x[0];
   stars[n].y[1] = stars[n].y[0];
   stars[n].z[1] = stars[n].z[0];
   if (rand() % 4 == 0 && flag == WEIRD) {
-    stars[n].offsetX = (float) (rand() % 100 - 100 / 2);
-    stars[n].offsetY = (float) (rand() % 100 - 100 / 2);
-    stars[n].offsetR = (float) (rand() % 25 - 25 / 2);
+    stars[n].offsetX = (float)(rand() % 100 - 100 / 2);
+    stars[n].offsetY = (float)(rand() % 100 - 100 / 2);
+    stars[n].offsetR = (float)(rand() % 25 - 25 / 2);
   } else {
     stars[n].offsetX = 0.0;
     stars[n].offsetY = 0.0;
@@ -116,9 +102,7 @@ NewStar(GLint n, GLint d)
   }
 }
 
-void
-RotatePoint(float *x, float *y, float rotation)
-{
+void RotatePoint(float *x, float *y, float rotation) {
   float tmpX, tmpY;
 
   tmpX = *x * Cos(rotation) - *y * Sin(rotation);
@@ -127,9 +111,7 @@ RotatePoint(float *x, float *y, float rotation)
   *y = tmpY;
 }
 
-void
-MoveStars(void)
-{
+void MoveStars(void) {
   float offset;
   GLint n;
 
@@ -149,9 +131,7 @@ MoveStars(void)
   }
 }
 
-GLenum
-StarPoint(GLint n)
-{
+GLenum StarPoint(GLint n) {
   float x0, y0;
 
   x0 = stars[n].x[0] * windW / stars[n].z[0];
@@ -167,9 +147,7 @@ StarPoint(GLint n)
   }
 }
 
-void
-ShowStar(GLint n)
-{
+void ShowStar(GLint n) {
   float x0, y0, x1, y1, width;
   GLint i;
 
@@ -204,8 +182,8 @@ ShowStar(GLint n)
       glColor3f(1.0, 0.0, 0.0);
       glBegin(GL_POLYGON);
       for (i = 0; i < 8; i++) {
-        float x = x0 + width * Cos((float) i * MAXANGLES / 8.0);
-        float y = y0 + width * Sin((float) i * MAXANGLES / 8.0);
+        float x = x0 + width * Cos((float)i * MAXANGLES / 8.0);
+        float y = y0 + width * Sin((float)i * MAXANGLES / 8.0);
         glVertex2f(x, y);
       };
       glEnd();
@@ -213,9 +191,7 @@ ShowStar(GLint n)
   }
 }
 
-void
-UpdateStars(void)
-{
+void UpdateStars(void) {
   GLint n;
 
   glClear(GL_COLOR_BUFFER_BIT);
@@ -231,9 +207,7 @@ UpdateStars(void)
   }
 }
 
-void
-ShowStars(void)
-{
+void ShowStars(void) {
   GLint n;
 
   glClear(GL_COLOR_BUFFER_BIT);
@@ -245,13 +219,11 @@ ShowStars(void)
   }
 }
 
-static void
-Init(void)
-{
+static void Init(void) {
   float angle;
   GLint n;
 
-  srand((unsigned int) time(NULL));
+  srand((unsigned int)time(NULL));
 
   for (n = 0; n < MAXSTARS; n++) {
     NewStar(n, 100);
@@ -268,9 +240,7 @@ Init(void)
   glDisable(GL_DITHER);
 }
 
-void
-Reshape(int width, int height)
-{
+void Reshape(int width, int height) {
   windW = width;
   windH = height;
 
@@ -283,9 +253,7 @@ Reshape(int width, int height)
 }
 
 /* ARGSUSED1 */
-static void
-Key(unsigned char key, int x, int y)
-{
+static void Key(unsigned char key, int x, int y) {
   switch (key) {
   case ' ':
     flag = (flag == NORMAL) ? WEIRD : NORMAL;
@@ -298,13 +266,11 @@ Key(unsigned char key, int x, int y)
   }
 }
 
-void
-Idle(void)
-{
+void Idle(void) {
   MoveStars();
   UpdateStars();
   if (nitro > 0) {
-    speed = (float) (nitro / 10) + 1.0;
+    speed = (float)(nitro / 10) + 1.0;
     if (speed > MAXWARP) {
       speed = MAXWARP;
     }
@@ -313,7 +279,7 @@ Idle(void)
     }
   } else if (nitro < 0) {
     nitro++;
-    speed = (float) (-nitro / 10) + 1.0;
+    speed = (float)(-nitro / 10) + 1.0;
     if (speed > MAXWARP) {
       speed = MAXWARP;
     }
@@ -321,9 +287,7 @@ Idle(void)
   glutPostRedisplay();
 }
 
-void
-Display(void)
-{
+void Display(void) {
   ShowStars();
   if (doubleBuffer) {
     glutSwapBuffers();
@@ -332,9 +296,7 @@ Display(void)
   }
 }
 
-void
-Visible(int state)
-{
+void Visible(int state) {
   if (state == GLUT_VISIBLE) {
     glutIdleFunc(Idle);
   } else {
@@ -342,9 +304,7 @@ Visible(int state)
   }
 }
 
-static void
-Args(int argc, char **argv)
-{
+static void Args(int argc, char **argv) {
   GLint i;
 
   doubleBuffer = GL_TRUE;
@@ -358,9 +318,7 @@ Args(int argc, char **argv)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   GLenum type;
 
   glutInitWindowSize(windW, windH);
@@ -379,5 +337,5 @@ main(int argc, char **argv)
   glutVisibilityFunc(Visible);
   glutDisplayFunc(Display);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

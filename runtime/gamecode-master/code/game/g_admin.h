@@ -6,7 +6,7 @@ Portions Copyright (C) 2009 Karl F. Kuglin
 This file is part of the Open Arena source code.
 
 Originally copied from Tremulous under GPL version 2 including any later
-version.  The code has been modified to fit the needs of Open Arena. 
+version.  The code has been modified to fit the needs of Open Arena.
 
 Open Arena source code is free software; you can redistribute it
 and/or modify it under the terms of the GNU General Public License as
@@ -28,14 +28,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define _G_ADMIN_H
 
 #define AP(x) trap_SendServerCommand(-1, x)
-#define CP(x) trap_SendServerCommand(ent-g_entities, x)
+#define CP(x) trap_SendServerCommand(ent - g_entities, x)
 #define CPx(x, y) trap_SendServerCommand(x, y)
 #define ADMP(x) G_admin_print(ent, x)
 #define ADMBP(x) G_admin_buffer_print(ent, x)
 #define ADMBP_begin() G_admin_buffer_begin()
 #define ADMBP_end() G_admin_buffer_end(ent)
 
-#define MAX_ADMIN_LEVELS 32 
+#define MAX_ADMIN_LEVELS 32
 #define MAX_ADMIN_ADMINS 1024
 #define MAX_ADMIN_BANS 1024
 #define MAX_ADMIN_NAMELOGS 128
@@ -44,7 +44,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define MAX_ADMIN_COMMANDS 64
 #define MAX_ADMIN_CMD_LEN 20
 #define MAX_ADMIN_BAN_REASON 50
-//KK-OAX
+// KK-OAX
 #define MAX_ADMIN_WARNINGS 1024
 
 /*
@@ -54,14 +54,14 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  * 4 - can see team chat as a spectator
  * 5 - can switch teams any time, regardless of balance
  * 6 - does not need to specify a reason for a kick/ban
- * 7 - can call a vote at any time (regardless of a vote being disabled or 
+ * 7 - can call a vote at any time (regardless of a vote being disabled or
  * voting limitations)
  * 8 - does not need to specify a duration for a ban
  * 9 - can run commands from team chat
  * 0 - inactivity rules do not apply to them
  * ! - admin commands cannot be used on them
  * @ - does not show up as an admin in !listplayers
- * $ - sees all information in !listplayers 
+ * $ - sees all information in !listplayers
  * ? - receieves and can send /a admin messages
  */
 #define ADMF_IMMUNITY '1'
@@ -86,66 +86,60 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 // member of a struct at init time.  flag has been converted to char*
 
 typedef struct {
-	char *keyword;
-	qboolean(* handler) (gentity_t *ent, int skiparg);
-	char *flag;
-	char *function; // used for !help
-	char *syntax; // used for !help
-}
-g_admin_cmd_t;
+  char *keyword;
+  qboolean (*handler)(gentity_t *ent, int skiparg);
+  char *flag;
+  char *function; // used for !help
+  char *syntax;   // used for !help
+} g_admin_cmd_t;
 
 typedef struct g_admin_level {
-	int level;
-	char name[ MAX_NAME_LENGTH ];
-	char flags[ MAX_ADMIN_FLAGS ];
-}
-g_admin_level_t;
+  int level;
+  char name[MAX_NAME_LENGTH];
+  char flags[MAX_ADMIN_FLAGS];
+} g_admin_level_t;
 
 typedef struct g_admin_admin {
-	char guid[ 33 ];
-	char name[ MAX_NAME_LENGTH ];
-	int level;
-	char flags[ MAX_ADMIN_FLAGS ];
-}
-g_admin_admin_t;
+  char guid[33];
+  char name[MAX_NAME_LENGTH];
+  int level;
+  char flags[MAX_ADMIN_FLAGS];
+} g_admin_admin_t;
 
 typedef struct g_admin_ban {
-	char name[ MAX_NAME_LENGTH ];
-	char guid[ 33 ];
-	char ip[ 40 ];
-	char reason[ MAX_ADMIN_BAN_REASON ];
-	char made[ 18 ]; // big enough for strftime() %c
-	int expires;
-	char banner[ MAX_NAME_LENGTH ];
-}
-g_admin_ban_t;
+  char name[MAX_NAME_LENGTH];
+  char guid[33];
+  char ip[40];
+  char reason[MAX_ADMIN_BAN_REASON];
+  char made[18]; // big enough for strftime() %c
+  int expires;
+  char banner[MAX_NAME_LENGTH];
+} g_admin_ban_t;
 
 typedef struct g_admin_command {
-	char command[ MAX_ADMIN_CMD_LEN ];
-	char exec[ MAX_QPATH ];
-	char desc[ 50 ];
-	int levels[ MAX_ADMIN_LEVELS + 1 ];
-}
-g_admin_command_t;
+  char command[MAX_ADMIN_CMD_LEN];
+  char exec[MAX_QPATH];
+  char desc[50];
+  int levels[MAX_ADMIN_LEVELS + 1];
+} g_admin_command_t;
 
 typedef struct g_admin_namelog {
-	char name[ MAX_ADMIN_NAMELOG_NAMES ][ MAX_NAME_LENGTH ];
-	char ip[ 40 ];
-	char guid[ 33 ];
-	int slot;
-	qboolean banned;
-}
-g_admin_namelog_t;
-//KK-OAX Added for Warnings
+  char name[MAX_ADMIN_NAMELOG_NAMES][MAX_NAME_LENGTH];
+  char ip[40];
+  char guid[33];
+  int slot;
+  qboolean banned;
+} g_admin_namelog_t;
+// KK-OAX Added for Warnings
 
 typedef struct g_admin_warning {
-	char name[ MAX_NAME_LENGTH ];
-	char guid[ 33 ];
-	char ip[ 40 ];
-	char warning[MAX_STRING_CHARS];
-	char made[ 18 ];
-	char warner[MAX_NAME_LENGTH];
-	int expires;
+  char name[MAX_NAME_LENGTH];
+  char guid[33];
+  char ip[40];
+  char warning[MAX_STRING_CHARS];
+  char made[18];
+  char warner[MAX_NAME_LENGTH];
+  int expires;
 } g_admin_warning_t;
 
 qboolean G_admin_ban_check(char *userinfo, char *reason, int rlen);
@@ -182,7 +176,7 @@ qboolean G_admin_nextmap(gentity_t *ent, int skiparg);
 qboolean G_admin_namelog(gentity_t *ent, int skiparg);
 qboolean G_admin_lock(gentity_t *ent, int skiparg);
 qboolean G_admin_unlock(gentity_t *ent, int skiparg);
-//KK-OAX
+// KK-OAX
 qboolean G_admin_disorient(gentity_t *ent, int skiparg);
 qboolean G_admin_orient(gentity_t *ent, int skiparg);
 qboolean G_admin_slap(gentity_t *ent, int skiparg);

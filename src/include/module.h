@@ -1,281 +1,253 @@
 /*******************************************************************************
-	ClusterGL - module.h
+        ClusterGL - module.h
 *******************************************************************************/
 
 /*******************************************************************************
-	The main module interface
+        The main module interface
 *******************************************************************************/
-class Module
-{
+class Module {
 protected:
-	vector<Instruction *> *mListResult;
-	
-public:
-	Module(){}
+  vector<Instruction *> *mListResult;
 
-    //input
-	virtual bool process(vector<Instruction *> *i){return i != NULL;}
-	virtual bool process(byte *buf, int len){return (buf != NULL && len);}
-	
-	//output
-	virtual vector<Instruction *> *resultAsList(){return mListResult;}
-	
-	void setListResult(vector<Instruction *> *i){
-		mListResult = i;
-	}
-	
-	virtual void reply(Instruction *instr, int i){}
-	virtual bool sync()=0;
+public:
+  Module() {}
+
+  // input
+  virtual bool process(vector<Instruction *> *i) { return i != NULL; }
+  virtual bool process(byte *buf, int len) { return (buf != NULL && len); }
+
+  // output
+  virtual vector<Instruction *> *resultAsList() { return mListResult; }
+
+  void setListResult(vector<Instruction *> *i) { mListResult = i; }
+
+  virtual void reply(Instruction *instr, int i) {}
+  virtual bool sync() = 0;
 };
 
-
-
 /*******************************************************************************
-	Capture from a program
+        Capture from a program
 *******************************************************************************/
-class AppModule : public Module
-{
+class AppModule : public Module {
 public:
-	AppModule(string command);
+  AppModule(string command);
 
-	bool init(string command);
-	bool process(vector<Instruction *> *i);
-	bool sync();
+  bool init(string command);
+  bool process(vector<Instruction *> *i);
+  bool sync();
 };
 
-
 /*******************************************************************************
-	Output to stdout
+        Output to stdout
 *******************************************************************************/
-class TextModule : public Module
-{
+class TextModule : public Module {
 public:
-	TextModule();
-	bool init();
-	bool process(vector<Instruction *> *i);
-	bool sync();
+  TextModule();
+  bool init();
+  bool process(vector<Instruction *> *i);
+  bool sync();
 };
 
-
-
 /*******************************************************************************
-	Output to OpenGL (executing the commands)
+        Output to OpenGL (executing the commands)
 *******************************************************************************/
-class ExecModule : public Module
-{
-    bool makeWindow();
-    
-    bool handleViewMode(Instruction *i);
+class ExecModule : public Module {
+  bool makeWindow();
+
+  bool handleViewMode(Instruction *i);
 
 public:
-	ExecModule();
+  ExecModule();
 
-	bool init();
-	bool process(vector<Instruction *> *i);
-	bool sync();
+  bool init();
+  bool process(vector<Instruction *> *i);
+  bool sync();
 };
 
 /*******************************************************************************
- Network server module. This recvs commands and thus should go at the *start* 
+ Network server module. This recvs commands and thus should go at the *start*
  of the local pipeline. Blocks till a client connects.
 *******************************************************************************/
-class NetSrvModule : public Module
-{
-    int mSocket;
-    BufferedFd *mClientSocket;
-    
-    int internalRead(byte *input, int nByte);
-    int internalWrite(byte *input, int nByte);
-    
-    void recieveBuffer(void);
-	
+class NetSrvModule : public Module {
+  int mSocket;
+  BufferedFd *mClientSocket;
+
+  int internalRead(byte *input, int nByte);
+  int internalWrite(byte *input, int nByte);
+
+  void recieveBuffer(void);
+
 public:
-	NetSrvModule(int port);
+  NetSrvModule(int port);
 
-	bool process(vector<Instruction *> *i);
-	void reply(Instruction *instr, int i);
-	bool sync();
-
+  bool process(vector<Instruction *> *i);
+  void reply(Instruction *instr, int i);
+  bool sync();
 };
-
 
 /*******************************************************************************
-  Network client module. This sends commands, and thus should go at the *end* 
+  Network client module. This sends commands, and thus should go at the *end*
   of the local pipe (probably on the app side).
 *******************************************************************************/
-class NetClientModule : public Module
-{
-    vector<int> mSockets;
-	vector<bool> mConnect;
-	vector<double> consumption;
-    int numConnections;
-    
-    int internalWrite(void* buf, int nByte);
-	int internalRead(void *buf, size_t count);
-	int min_func();
-	void sendBuffer();
-	
+class NetClientModule : public Module {
+  vector<int> mSockets;
+  vector<bool> mConnect;
+  vector<double> consumption;
+  int numConnections;
+
+  int internalWrite(void *buf, int nByte);
+  int internalRead(void *buf, size_t count);
+  int min_func();
+  void sendBuffer();
+
 public:
-	NetClientModule();
+  NetClientModule();
 
-	bool process(vector<Instruction *> *i);
-	bool sync();		
+  bool process(vector<Instruction *> *i);
+  bool sync();
 };
-
 
 /*******************************************************************************
  Network server and client modules that uses OpenPGM for multicast
 *******************************************************************************/
-class MulticastSrvModule : public Module
-{
-    int mSocket;
-    BufferedFd *mClientSocket;
-    
-    int internalRead(byte *input, int nByte);
-    int internalWrite(byte *input, int nByte);
-    
-    void recieveBuffer(void);
-	
+class MulticastSrvModule : public Module {
+  int mSocket;
+  BufferedFd *mClientSocket;
+
+  int internalRead(byte *input, int nByte);
+  int internalWrite(byte *input, int nByte);
+
+  void recieveBuffer(void);
+
 public:
-	MulticastSrvModule();
+  MulticastSrvModule();
 
-	bool process(vector<Instruction *> *i);
-	void reply(Instruction *instr, int i);
-	bool sync();
-
+  bool process(vector<Instruction *> *i);
+  void reply(Instruction *instr, int i);
+  bool sync();
 };
 
-class MulticastClientModule : public Module
-{
-    vector<int> mSockets;
-	//vector<double> consumption;
-    int numConnections;
-    vector<bool> mConnects;
-    int internalWrite(void* buf, int nByte);
-	int internalRead(void *buf, size_t count);
-	
-	void sendBuffer();
-	
-public:
-	MulticastClientModule();
+class MulticastClientModule : public Module {
+  vector<int> mSockets;
+  // vector<double> consumption;
+  int numConnections;
+  vector<bool> mConnects;
+  int internalWrite(void *buf, int nByte);
+  int internalRead(void *buf, size_t count);
 
-	bool process(vector<Instruction *> *i);
-	bool sync();		
+  void sendBuffer();
+
+public:
+  MulticastClientModule();
+
+  bool process(vector<Instruction *> *i);
+  bool sync();
 };
 
 /*******************************************************************************
  Insertion module. Insert instructions into a frame at runtime
 *******************************************************************************/
-class InsertModule : public Module
-{
+class InsertModule : public Module {
 public:
-	InsertModule();
+  InsertModule();
 
-	bool init();
-	bool process(vector<Instruction *> *i);
-	void reply(Instruction *instr, int i);
-	bool sync();
+  bool init();
+  bool process(vector<Instruction *> *i);
+  void reply(Instruction *instr, int i);
+  bool sync();
 };
-
 
 /*******************************************************************************
  Profiling module
 *******************************************************************************/
-class ProfileModule : public Module
-{
+class ProfileModule : public Module {
 public:
-	ProfileModule();
+  ProfileModule();
 
-	bool process(vector<Instruction *> *i);
-	void reply(Instruction *instr, int i);
-	bool sync();
-	void resetCounts();
-	void output();
-	void outputBuffers();
+  bool process(vector<Instruction *> *i);
+  void reply(Instruction *instr, int i);
+  bool sync();
+  void resetCounts();
+  void output();
+  void outputBuffers();
 };
-
-
 
 /*******************************************************************************
  Delta module. Remove duplicate instructions, replace with CGL_REPEAT's
 *******************************************************************************/
-class DeltaEncodeModule : public Module
-{
-	vector<Instruction *> lastFrame;
-	
-	Instruction *makeSkip(uint32_t n);
+class DeltaEncodeModule : public Module {
+  vector<Instruction *> lastFrame;
+
+  Instruction *makeSkip(uint32_t n);
+
 public:
-	DeltaEncodeModule();
-    
-    //input
-	bool process(vector<Instruction *> *i);
-	
-	//output
-	vector<Instruction *> *resultAsList();
-	
-	bool sync(){return true;}
+  DeltaEncodeModule();
+
+  // input
+  bool process(vector<Instruction *> *i);
+
+  // output
+  vector<Instruction *> *resultAsList();
+
+  bool sync() { return true; }
 };
 
-class DeltaDecodeModule : public Module
-{	
-	vector<Instruction *> lastFrame;
+class DeltaDecodeModule : public Module {
+  vector<Instruction *> lastFrame;
+
 public:
-	DeltaDecodeModule();
-    
-    //input
-	bool process(vector<Instruction *> *i);
-	
-	//output
-	vector<Instruction *> *resultAsList();
-		
-	bool sync(){return true;}
+  DeltaDecodeModule();
+
+  // input
+  bool process(vector<Instruction *> *i);
+
+  // output
+  vector<Instruction *> *resultAsList();
+
+  bool sync() { return true; }
 };
-
-
 
 /*******************************************************************************
  DuplicateBuffer module. Keeps a LRU of buffers+hash.
 *******************************************************************************/
-typedef LRUCache<uint32_t,byte *> lru_cache;	
+typedef LRUCache<uint32_t, byte *> lru_cache;
 
-class DuplicateBufferEncodeModule : public Module
-{
-	lru_cache *mLRU;
+class DuplicateBufferEncodeModule : public Module {
+  lru_cache *mLRU;
+
 public:
-	DuplicateBufferEncodeModule();
-    
-    //input
-	bool process(vector<Instruction *> *i);
-	
-	//output
-	vector<Instruction *> *resultAsList();
-	
-	bool sync(){return true;}
+  DuplicateBufferEncodeModule();
+
+  // input
+  bool process(vector<Instruction *> *i);
+
+  // output
+  vector<Instruction *> *resultAsList();
+
+  bool sync() { return true; }
 };
 
-class DuplicateBufferDecodeModule : public Module
-{	
-	lru_cache *mLRU;
+class DuplicateBufferDecodeModule : public Module {
+  lru_cache *mLRU;
+
 public:
-	DuplicateBufferDecodeModule();
-    
-    //input
-	bool process(vector<Instruction *> *i);
-	
-	//output
-	vector<Instruction *> *resultAsList();
-	
-	bool sync(){return true;}
+  DuplicateBufferDecodeModule();
+
+  // input
+  bool process(vector<Instruction *> *i);
+
+  // output
+  vector<Instruction *> *resultAsList();
+
+  bool sync() { return true; }
 };
-
-
 
 /*******************************************************************************
-	Data compression global. Not really a global, but it used to be
+        Data compression global. Not really a global, but it used to be
 *******************************************************************************/
-class Compression{
+class Compression {
 public:
-	static int decompress(void *dest, int destLen, int sourceLen);
-	static int compress(void *input, int nByte);
-	static byte *getBuf();
+  static int decompress(void *dest, int destLen, int sourceLen);
+  static int compress(void *input, int nByte);
+  static byte *getBuf();
 };

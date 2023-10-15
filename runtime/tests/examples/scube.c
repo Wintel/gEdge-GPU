@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, 1994, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -42,11 +42,11 @@
  * 1992 David G Yu -- Silicon Graphics Computer Systems
  */
 
+#include <GL/glut.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <GL/glut.h>
 
 static int useRGB = 1;
 static int useLighting = 1;
@@ -58,142 +58,97 @@ static int useQuads = 1;
 static int tick = -1;
 static int moving = 1;
 
-#define GREY	0
-#define RED	1
-#define GREEN	2
-#define BLUE	3
-#define CYAN	4
-#define MAGENTA	5
-#define YELLOW	6
-#define BLACK	7
+#define GREY 0
+#define RED 1
+#define GREEN 2
+#define BLUE 3
+#define CYAN 4
+#define MAGENTA 5
+#define YELLOW 6
+#define BLACK 7
 
-static float materialColor[8][4] =
-{
-  {0.8, 0.8, 0.8, 1.0},
-  {0.8, 0.0, 0.0, 1.0},
-  {0.0, 0.8, 0.0, 1.0},
-  {0.0, 0.0, 0.8, 1.0},
-  {0.0, 0.8, 0.8, 1.0},
-  {0.8, 0.0, 0.8, 1.0},
-  {0.8, 0.8, 0.0, 1.0},
-  {0.0, 0.0, 0.0, 0.6},
+static float materialColor[8][4] = {
+    {0.8, 0.8, 0.8, 1.0}, {0.8, 0.0, 0.0, 1.0}, {0.0, 0.8, 0.0, 1.0},
+    {0.0, 0.0, 0.8, 1.0}, {0.0, 0.8, 0.8, 1.0}, {0.8, 0.0, 0.8, 1.0},
+    {0.8, 0.8, 0.0, 1.0}, {0.0, 0.0, 0.0, 0.6},
 };
 
-static float lightPos[4] =
-{2.0, 4.0, 2.0, 1.0};
+static float lightPos[4] = {2.0, 4.0, 2.0, 1.0};
 #if 0
 static float lightDir[4] =
 {-2.0, -4.0, -2.0, 1.0};
 #endif
-static float lightAmb[4] =
-{0.2, 0.2, 0.2, 1.0};
-static float lightDiff[4] =
-{0.8, 0.8, 0.8, 1.0};
-static float lightSpec[4] =
-{0.4, 0.4, 0.4, 1.0};
+static float lightAmb[4] = {0.2, 0.2, 0.2, 1.0};
+static float lightDiff[4] = {0.8, 0.8, 0.8, 1.0};
+static float lightSpec[4] = {0.4, 0.4, 0.4, 1.0};
 
-static float groundPlane[4] =
-{0.0, 1.0, 0.0, 1.499};
-static float backPlane[4] =
-{0.0, 0.0, 1.0, 0.899};
+static float groundPlane[4] = {0.0, 1.0, 0.0, 1.499};
+static float backPlane[4] = {0.0, 0.0, 1.0, 0.899};
 
-static float fogColor[4] =
-{0.0, 0.0, 0.0, 0.0};
-static float fogIndex[1] =
-{0.0};
+static float fogColor[4] = {0.0, 0.0, 0.0, 0.0};
+static float fogIndex[1] = {0.0};
 
-static unsigned char shadowPattern[128] =
-{
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,  /* 50% Grey */
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
-  0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55
-};
+static unsigned char shadowPattern[128] = {
+    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55, /* 50% Grey */
+    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa,
+    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa,
+    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa,
+    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa,
+    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
+    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa,
+    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55};
 
-static unsigned char sgiPattern[128] =
-{
-  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,  /* SGI Logo */
-  0xff, 0xbd, 0xff, 0x83, 0xff, 0x5a, 0xff, 0xef,
-  0xfe, 0xdb, 0x7f, 0xef, 0xfd, 0xdb, 0xbf, 0xef,
-  0xfb, 0xdb, 0xdf, 0xef, 0xf7, 0xdb, 0xef, 0xef,
-  0xfb, 0xdb, 0xdf, 0xef, 0xfd, 0xdb, 0xbf, 0x83,
-  0xce, 0xdb, 0x73, 0xff, 0xb7, 0x5a, 0xed, 0xff,
-  0xbb, 0xdb, 0xdd, 0xc7, 0xbd, 0xdb, 0xbd, 0xbb,
-  0xbe, 0xbd, 0x7d, 0xbb, 0xbf, 0x7e, 0xfd, 0xb3,
-  0xbe, 0xe7, 0x7d, 0xbf, 0xbd, 0xdb, 0xbd, 0xbf,
-  0xbb, 0xbd, 0xdd, 0xbb, 0xb7, 0x7e, 0xed, 0xc7,
-  0xce, 0xdb, 0x73, 0xff, 0xfd, 0xdb, 0xbf, 0xff,
-  0xfb, 0xdb, 0xdf, 0x87, 0xf7, 0xdb, 0xef, 0xfb,
-  0xf7, 0xdb, 0xef, 0xfb, 0xfb, 0xdb, 0xdf, 0xfb,
-  0xfd, 0xdb, 0xbf, 0xc7, 0xfe, 0xdb, 0x7f, 0xbf,
-  0xff, 0x5a, 0xff, 0xbf, 0xff, 0xbd, 0xff, 0xc3,
-  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
-};
+static unsigned char sgiPattern[128] = {
+    0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, /* SGI Logo */
+    0xff, 0xbd, 0xff, 0x83, 0xff, 0x5a, 0xff, 0xef, 0xfe, 0xdb, 0x7f, 0xef,
+    0xfd, 0xdb, 0xbf, 0xef, 0xfb, 0xdb, 0xdf, 0xef, 0xf7, 0xdb, 0xef, 0xef,
+    0xfb, 0xdb, 0xdf, 0xef, 0xfd, 0xdb, 0xbf, 0x83, 0xce, 0xdb, 0x73, 0xff,
+    0xb7, 0x5a, 0xed, 0xff, 0xbb, 0xdb, 0xdd, 0xc7, 0xbd, 0xdb, 0xbd, 0xbb,
+    0xbe, 0xbd, 0x7d, 0xbb, 0xbf, 0x7e, 0xfd, 0xb3, 0xbe, 0xe7, 0x7d, 0xbf,
+    0xbd, 0xdb, 0xbd, 0xbf, 0xbb, 0xbd, 0xdd, 0xbb, 0xb7, 0x7e, 0xed, 0xc7,
+    0xce, 0xdb, 0x73, 0xff, 0xfd, 0xdb, 0xbf, 0xff, 0xfb, 0xdb, 0xdf, 0x87,
+    0xf7, 0xdb, 0xef, 0xfb, 0xf7, 0xdb, 0xef, 0xfb, 0xfb, 0xdb, 0xdf, 0xfb,
+    0xfd, 0xdb, 0xbf, 0xc7, 0xfe, 0xdb, 0x7f, 0xbf, 0xff, 0x5a, 0xff, 0xbf,
+    0xff, 0xbd, 0xff, 0xc3, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
 
-static float cube_vertexes[6][4][4] =
-{
-  {
-    {-1.0, -1.0, -1.0, 1.0},
-    {-1.0, -1.0, 1.0, 1.0},
-    {-1.0, 1.0, 1.0, 1.0},
-    {-1.0, 1.0, -1.0, 1.0}},
+static float cube_vertexes[6][4][4] = {{{-1.0, -1.0, -1.0, 1.0},
+                                        {-1.0, -1.0, 1.0, 1.0},
+                                        {-1.0, 1.0, 1.0, 1.0},
+                                        {-1.0, 1.0, -1.0, 1.0}},
 
-  {
-    {1.0, 1.0, 1.0, 1.0},
-    {1.0, -1.0, 1.0, 1.0},
-    {1.0, -1.0, -1.0, 1.0},
-    {1.0, 1.0, -1.0, 1.0}},
+                                       {{1.0, 1.0, 1.0, 1.0},
+                                        {1.0, -1.0, 1.0, 1.0},
+                                        {1.0, -1.0, -1.0, 1.0},
+                                        {1.0, 1.0, -1.0, 1.0}},
 
-  {
-    {-1.0, -1.0, -1.0, 1.0},
-    {1.0, -1.0, -1.0, 1.0},
-    {1.0, -1.0, 1.0, 1.0},
-    {-1.0, -1.0, 1.0, 1.0}},
+                                       {{-1.0, -1.0, -1.0, 1.0},
+                                        {1.0, -1.0, -1.0, 1.0},
+                                        {1.0, -1.0, 1.0, 1.0},
+                                        {-1.0, -1.0, 1.0, 1.0}},
 
-  {
-    {1.0, 1.0, 1.0, 1.0},
-    {1.0, 1.0, -1.0, 1.0},
-    {-1.0, 1.0, -1.0, 1.0},
-    {-1.0, 1.0, 1.0, 1.0}},
+                                       {{1.0, 1.0, 1.0, 1.0},
+                                        {1.0, 1.0, -1.0, 1.0},
+                                        {-1.0, 1.0, -1.0, 1.0},
+                                        {-1.0, 1.0, 1.0, 1.0}},
 
-  {
-    {-1.0, -1.0, -1.0, 1.0},
-    {-1.0, 1.0, -1.0, 1.0},
-    {1.0, 1.0, -1.0, 1.0},
-    {1.0, -1.0, -1.0, 1.0}},
+                                       {{-1.0, -1.0, -1.0, 1.0},
+                                        {-1.0, 1.0, -1.0, 1.0},
+                                        {1.0, 1.0, -1.0, 1.0},
+                                        {1.0, -1.0, -1.0, 1.0}},
 
-  {
-    {1.0, 1.0, 1.0, 1.0},
-    {-1.0, 1.0, 1.0, 1.0},
-    {-1.0, -1.0, 1.0, 1.0},
-    {1.0, -1.0, 1.0, 1.0}}
-};
+                                       {{1.0, 1.0, 1.0, 1.0},
+                                        {-1.0, 1.0, 1.0, 1.0},
+                                        {-1.0, -1.0, 1.0, 1.0},
+                                        {1.0, -1.0, 1.0, 1.0}}};
 
-static float cube_normals[6][4] =
-{
-  {-1.0, 0.0, 0.0, 0.0},
-  {1.0, 0.0, 0.0, 0.0},
-  {0.0, -1.0, 0.0, 0.0},
-  {0.0, 1.0, 0.0, 0.0},
-  {0.0, 0.0, -1.0, 0.0},
-  {0.0, 0.0, 1.0, 0.0}
-};
+static float cube_normals[6][4] = {{-1.0, 0.0, 0.0, 0.0}, {1.0, 0.0, 0.0, 0.0},
+                                   {0.0, -1.0, 0.0, 0.0}, {0.0, 1.0, 0.0, 0.0},
+                                   {0.0, 0.0, -1.0, 0.0}, {0.0, 0.0, 1.0, 0.0}};
 
-static void
-usage(void)
-{
+static void usage(void) {
   printf("\n");
   printf("usage: scube [options]\n");
   printf("\n");
@@ -208,16 +163,14 @@ usage(void)
   printf("    -logo      toggle sgi logo for the shadow pattern\n");
   printf("    -quads     toggle use of GL_QUADS to draw the checkerboard\n");
   printf("\n");
-#ifndef EXIT_FAILURE    /* should be defined by ANSI C
-                           <stdlib.h> */
+#ifndef EXIT_FAILURE /* should be defined by ANSI C                            \
+                        <stdlib.h> */
 #define EXIT_FAILURE 1
 #endif
   exit(EXIT_FAILURE);
 }
 
-void
-buildColormap(void)
-{
+void buildColormap(void) {
   if (useRGB) {
     return;
   } else {
@@ -249,16 +202,13 @@ buildColormap(void)
   }
 }
 
-static void
-setColor(int c)
-{
+static void setColor(int c) {
   if (useLighting) {
     if (useRGB) {
-      glMaterialfv(GL_FRONT_AND_BACK,
-        GL_AMBIENT_AND_DIFFUSE, &materialColor[c][0]);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE,
+                   &materialColor[c][0]);
     } else {
-      glMaterialfv(GL_FRONT_AND_BACK,
-        GL_COLOR_INDEXES, &materialColor[c][0]);
+      glMaterialfv(GL_FRONT_AND_BACK, GL_COLOR_INDEXES, &materialColor[c][0]);
     }
   } else {
     if (useRGB) {
@@ -269,9 +219,7 @@ setColor(int c)
   }
 }
 
-static void
-drawCube(int color)
-{
+static void drawCube(int color) {
   int i;
 
   setColor(color);
@@ -287,16 +235,13 @@ drawCube(int color)
   }
 }
 
-static void
-drawCheck(int w, int h, int evenColor, int oddColor)
-{
+static void drawCheck(int w, int h, int evenColor, int oddColor) {
   static int initialized = 0;
   static int usedLighting = 0;
   static GLuint checklist = 0;
 
   if (!initialized || (usedLighting != useLighting)) {
-    static float square_normal[4] =
-    {0.0, 0.0, 1.0, 0.0};
+    static float square_normal[4] = {0.0, 0.0, 1.0, 0.0};
     static float square[4][4];
     int i, j;
 
@@ -362,16 +307,12 @@ drawCheck(int w, int h, int evenColor, int oddColor)
   }
 }
 
-static void
-myShadowMatrix(float ground[4], float light[4])
-{
+static void myShadowMatrix(float ground[4], float light[4]) {
   float dot;
   float shadowMat[4][4];
 
-  dot = ground[0] * light[0] +
-    ground[1] * light[1] +
-    ground[2] * light[2] +
-    ground[3] * light[3];
+  dot = ground[0] * light[0] + ground[1] * light[1] + ground[2] * light[2] +
+        ground[3] * light[3];
 
   shadowMat[0][0] = dot - light[0] * ground[0];
   shadowMat[1][0] = 0.0 - light[0] * ground[1];
@@ -393,7 +334,7 @@ myShadowMatrix(float ground[4], float light[4])
   shadowMat[2][3] = 0.0 - light[3] * ground[2];
   shadowMat[3][3] = dot - light[3] * ground[3];
 
-  glMultMatrixf((const GLfloat *) shadowMat);
+  glMultMatrixf((const GLfloat *)shadowMat);
 }
 
 static char *windowNameRGBDB = "shadow cube (OpenGL RGB DB)";
@@ -401,9 +342,7 @@ static char *windowNameRGB = "shadow cube (OpenGL RGB)";
 static char *windowNameIndexDB = "shadow cube (OpenGL Index DB)";
 static char *windowNameIndex = "shadow cube (OpenGL Index)";
 
-void
-idle(void)
-{
+void idle(void) {
   tick++;
   if (tick >= 120) {
     tick = 0;
@@ -412,18 +351,15 @@ idle(void)
 }
 
 /* ARGSUSED1 */
-void
-keyboard(unsigned char ch, int x, int y)
-{
+void keyboard(unsigned char ch, int x, int y) {
   switch (ch) {
-  case 27:             /* escape */
+  case 27: /* escape */
     exit(0);
     break;
   case 'L':
   case 'l':
     useLighting = !useLighting;
-    useLighting ? glEnable(GL_LIGHTING) :
-      glDisable(GL_LIGHTING);
+    useLighting ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
     glutPostRedisplay();
     break;
   case 'F':
@@ -452,9 +388,7 @@ keyboard(unsigned char ch, int x, int y)
   }
 }
 
-void
-display(void)
-{
+void display(void) {
   GLfloat cubeXform[4][4];
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -464,14 +398,14 @@ display(void)
   glRotatef(-90.0, 1, 0, 0);
   glScalef(2.0, 2.0, 2.0);
 
-  drawCheck(6, 6, BLUE, YELLOW);  /* draw ground */
+  drawCheck(6, 6, BLUE, YELLOW); /* draw ground */
   glPopMatrix();
 
   glPushMatrix();
   glTranslatef(0.0, 0.0, -0.9);
   glScalef(2.0, 2.0, 2.0);
 
-  drawCheck(6, 6, BLUE, YELLOW);  /* draw back */
+  drawCheck(6, 6, BLUE, YELLOW); /* draw back */
   glPopMatrix();
 
   glPushMatrix();
@@ -481,9 +415,9 @@ display(void)
   glRotatef((360.0 / (30 * 2)) * tick, 0, 1, 0);
   glRotatef((360.0 / (30 * 4)) * tick, 0, 0, 1);
   glScalef(1.0, 2.0, 1.0);
-  glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *) cubeXform);
+  glGetFloatv(GL_MODELVIEW_MATRIX, (GLfloat *)cubeXform);
 
-  drawCube(RED);        /* draw cube */
+  drawCube(RED); /* draw cube */
   glPopMatrix();
 
   glDepthMask(GL_FALSE);
@@ -498,17 +432,17 @@ display(void)
   glPushMatrix();
   myShadowMatrix(groundPlane, lightPos);
   glTranslatef(0.0, 0.0, 2.0);
-  glMultMatrixf((const GLfloat *) cubeXform);
+  glMultMatrixf((const GLfloat *)cubeXform);
 
-  drawCube(BLACK);      /* draw ground shadow */
+  drawCube(BLACK); /* draw ground shadow */
   glPopMatrix();
 
   glPushMatrix();
   myShadowMatrix(backPlane, lightPos);
   glTranslatef(0.0, 0.0, 2.0);
-  glMultMatrixf((const GLfloat *) cubeXform);
+  glMultMatrixf((const GLfloat *)cubeXform);
 
-  drawCube(BLACK);      /* draw back shadow */
+  drawCube(BLACK); /* draw back shadow */
   glPopMatrix();
 
   glDepthMask(GL_TRUE);
@@ -527,16 +461,12 @@ display(void)
   }
 }
 
-void
-fog_select(int fog)
-{
+void fog_select(int fog) {
   glFogf(GL_FOG_MODE, fog);
   glutPostRedisplay();
 }
 
-void
-menu_select(int mode)
-{
+void menu_select(int mode) {
   switch (mode) {
   case 1:
     moving = 1;
@@ -553,8 +483,7 @@ menu_select(int mode)
     break;
   case 4:
     useLighting = !useLighting;
-    useLighting ? glEnable(GL_LIGHTING) :
-      glDisable(GL_LIGHTING);
+    useLighting ? glEnable(GL_LIGHTING) : glDisable(GL_LIGHTING);
     glutPostRedisplay();
     break;
   case 5:
@@ -563,9 +492,7 @@ menu_select(int mode)
   }
 }
 
-void
-visible(int state)
-{
+void visible(int state) {
   if (state == GLUT_VISIBLE) {
     if (moving)
       glutIdleFunc(idle);
@@ -575,9 +502,7 @@ visible(int state)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int width = 350, height = 350;
   int i;
   char *name;
@@ -689,9 +614,9 @@ main(int argc, char **argv)
 
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   if (useLogo) {
-    glPolygonStipple((const GLubyte *) sgiPattern);
+    glPolygonStipple((const GLubyte *)sgiPattern);
   } else {
-    glPolygonStipple((const GLubyte *) shadowPattern);
+    glPolygonStipple((const GLubyte *)shadowPattern);
   }
 
   glClearColor(0.0, 0.0, 0.0, 1);
@@ -699,5 +624,5 @@ main(int argc, char **argv)
   glClearDepth(1);
 
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

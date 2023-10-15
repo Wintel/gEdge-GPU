@@ -1,8 +1,8 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994.  */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
 /* This program uses 3D texture coordinates to introduce
@@ -17,11 +17,11 @@
    it is just the texture matrix that is changing to shift
    the final 2D texture coordinates. */
 
+#include <GL/glut.h>
+#include <math.h> /* for cos(), sin(), and sqrt() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>       /* for cos(), sin(), and sqrt() */
-#include <GL/glut.h>
 
 extern unsigned char mjk_image[];
 extern int mjk_depth;
@@ -38,15 +38,13 @@ int sifting = 1;
 int scaling = 0;
 int interval = 100;
 
-void
-animate(int value)
-{
+void animate(int value) {
   if (visible) {
     if (sifting || scaling) {
       if (value) {
         if (sifting) {
           tick1 += 4 * (interval / 100.0);
-          angle = ((int) tick1) % 360;
+          angle = ((int)tick1) % 360;
         }
         if (scaling) {
           tick2 += 2 * (interval / 100.0);
@@ -60,17 +58,14 @@ animate(int value)
 }
 
 /* Setup display list with "frozen" 3D texture coordinates. */
-void
-generateTexturedSurface(void)
-{
-  static GLfloat data[8] =
-  {0, 1, 0, -1};
+void generateTexturedSurface(void) {
+  static GLfloat data[8] = {0, 1, 0, -1};
   int i, j;
 
 #define COLS 12
 #define ROWS 12
-#define TILE_TEX_W (1.0/COLS)
-#define TILE_TEX_H (1.0/ROWS)
+#define TILE_TEX_W (1.0 / COLS)
+#define TILE_TEX_H (1.0 / ROWS)
 
   glNewList(1, GL_COMPILE);
   glTranslatef(-COLS / 2.0 + .5, -ROWS / 2.0 + .5, 0);
@@ -84,7 +79,8 @@ generateTexturedSurface(void)
     }
     glTexCoord3f((i + 1) * TILE_TEX_W, j * TILE_TEX_H, data[(i + j) % 4]);
     glVertex2f(i + .5, j - .5);
-    glTexCoord3f((i + 1) * TILE_TEX_W, (j + 1) * TILE_TEX_H, data[(i + j + 1) % 4]);
+    glTexCoord3f((i + 1) * TILE_TEX_W, (j + 1) * TILE_TEX_H,
+                 data[(i + j + 1) % 4]);
     glVertex2f(i + .5, j + .5);
     glEnd();
   }
@@ -93,9 +89,7 @@ generateTexturedSurface(void)
 
 /* Construct an identity matrix except that the third coordinate
    can be used to "sift" the X and Y coordinates. */
-void
-makeSift(GLfloat m[16], float xsift, float ysift)
-{
+void makeSift(GLfloat m[16], float xsift, float ysift) {
   m[0 + 4 * 0] = 1;
   m[0 + 4 * 1] = 0;
   m[0 + 4 * 2] = xsift;
@@ -117,9 +111,7 @@ makeSift(GLfloat m[16], float xsift, float ysift)
   m[3 + 4 * 3] = 1;
 }
 
-void
-redraw(void)
-{
+void redraw(void) {
   int begin, end, elapsed;
   GLfloat matrix[16];
 
@@ -157,9 +149,7 @@ int height;
 int depth;
 unsigned char *bits;
 
-void
-visibility(int state)
-{
+void visibility(int state) {
   if (state == GLUT_VISIBLE) {
     visible = 1;
     animate(0);
@@ -168,24 +158,16 @@ visibility(int state)
   }
 }
 
-void
-minify_select(int value)
-{
+void minify_select(int value) {
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, value);
-  gluBuild2DMipmaps(GL_TEXTURE_2D, depth, width, height,
-    GL_RGB, GL_UNSIGNED_BYTE, bits);
+  gluBuild2DMipmaps(GL_TEXTURE_2D, depth, width, height, GL_RGB,
+                    GL_UNSIGNED_BYTE, bits);
   glutPostRedisplay();
 }
 
-void
-rate_select(int value)
-{
-  interval = value;
-}
+void rate_select(int value) { interval = value; }
 
-void
-menu_select(int value)
-{
+void menu_select(int value) {
   switch (value) {
   case 1:
     sifting = !sifting;
@@ -202,9 +184,7 @@ menu_select(int value)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int minify_menu, rate_menu;
 
   glutInit(&argc, argv);
@@ -212,20 +192,20 @@ main(int argc, char **argv)
   glutCreateWindow("mjksift");
   glutDisplayFunc(redraw);
   glMatrixMode(GL_PROJECTION);
-  gluPerspective( /* field of view in degree */ 40.0,
-  /* aspect ratio */ 1.0,
-    /* Z near */ 1.0, /* Z far */ 70.0);
+  gluPerspective(/* field of view in degree */ 40.0,
+                 /* aspect ratio */ 1.0,
+                 /* Z near */ 1.0, /* Z far */ 70.0);
   glMatrixMode(GL_MODELVIEW);
-  gluLookAt(0.0, 0.0, 5.0,  /* eye is at (0,0,30) */
-    0.0, 0.0, 0.0,      /* center is at (0,0,0) */
-    0.0, 1.0, 0.);      /* up is in positive Y direction */
+  gluLookAt(0.0, 0.0, 5.0, /* eye is at (0,0,30) */
+            0.0, 0.0, 0.0, /* center is at (0,0,0) */
+            0.0, 1.0, 0.); /* up is in positive Y direction */
   depth = mjk_depth;
   width = mjk_width;
   height = mjk_height;
   bits = mjk_image;
   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-  gluBuild2DMipmaps(GL_TEXTURE_2D, depth, width, height,
-    GL_RGB, GL_UNSIGNED_BYTE, bits);
+  gluBuild2DMipmaps(GL_TEXTURE_2D, depth, width, height, GL_RGB,
+                    GL_UNSIGNED_BYTE, bits);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -257,5 +237,5 @@ main(int argc, char **argv)
   menu_select(3);
   generateTexturedSurface();
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

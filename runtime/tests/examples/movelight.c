@@ -1,20 +1,20 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
 /**
  * (c) Copyright 1993, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -28,8 +28,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -43,23 +43,23 @@
  */
 /**
  *  movelight.c
- *  This program demonstrates when to issue lighting and 
- *  transformation commands to render a model with a light 
- *  which is moved by a modeling transformation (rotate or 
- *  translate).  The light position is reset after the modeling 
+ *  This program demonstrates when to issue lighting and
+ *  transformation commands to render a model with a light
+ *  which is moved by a modeling transformation (rotate or
+ *  translate).  The light position is reset after the modeling
  *  transformation is called.  The eye position does not change.
  *
- *  A sphere is drawn using a grey material characteristic. 
+ *  A sphere is drawn using a grey material characteristic.
  *  A single light source illuminates the object.
  *
  *  Interaction:  pressing the left or middle mouse button
- *  alters the modeling transformation (x rotation) by 30 degrees.  
+ *  alters the modeling transformation (x rotation) by 30 degrees.
  *  The scene is then redrawn with the light in a new position.
  */
-#include <stdlib.h>
+#include <GL/glut.h>
 #include <stdarg.h>
 #include <stdio.h>
-#include <GL/glut.h>
+#include <stdlib.h>
 
 #define TORUS 0
 #define TEAPOT 1
@@ -72,9 +72,7 @@ static int spin = 0;
 static int obj = TORUS;
 static int begin;
 
-void
-output(GLfloat x, GLfloat y, char *format,...)
-{
+void output(GLfloat x, GLfloat y, char *format, ...) {
   va_list args;
   char buffer[200], *p;
 
@@ -88,9 +86,7 @@ output(GLfloat x, GLfloat y, char *format,...)
   glPopMatrix();
 }
 
-void
-menu_select(int item)
-{
+void menu_select(int item) {
   if (item == QUIT)
     exit(0);
   obj = item;
@@ -98,26 +94,20 @@ menu_select(int item)
 }
 
 /* ARGSUSED2 */
-void
-movelight(int button, int state, int x, int y)
-{
+void movelight(int button, int state, int x, int y) {
   if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
     begin = x;
   }
 }
 
 /* ARGSUSED1 */
-void
-motion(int x, int y)
-{
+void motion(int x, int y) {
   spin = (spin + (x - begin)) % 360;
   begin = x;
   glutPostRedisplay();
 }
 
-void
-myinit(void)
-{
+void myinit(void) {
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
 
@@ -126,15 +116,12 @@ myinit(void)
 }
 
 /*  Here is where the light position is reset after the modeling
- *  transformation (glRotated) is called.  This places the 
+ *  transformation (glRotated) is called.  This places the
  *  light at a new position in world coordinates.  The cube
  *  represents the position of the light.
  */
-void
-display(void)
-{
-  GLfloat position[] =
-  {0.0, 0.0, 1.5, 1.0};
+void display(void) {
+  GLfloat position[] = {0.0, 0.0, 1.5, 1.0};
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glMatrixMode(GL_MODELVIEW);
@@ -142,7 +129,7 @@ display(void)
   glTranslatef(0.0, 0.0, -5.0);
 
   glPushMatrix();
-  glRotated((GLdouble) spin, 0.0, 1.0, 0.0);
+  glRotated((GLdouble)spin, 0.0, 1.0, 0.0);
   glRotated(0.0, 1.0, 0.0, 0.0);
   glLightfv(GL_LIGHT0, GL_POSITION, position);
 
@@ -197,69 +184,49 @@ display(void)
   glutSwapBuffers();
 }
 
-void
-myReshape(int w, int h)
-{
+void myReshape(int w, int h) {
   glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(40.0, (GLfloat) w / (GLfloat) h, 1.0, 20.0);
+  gluPerspective(40.0, (GLfloat)w / (GLfloat)h, 1.0, 20.0);
   glMatrixMode(GL_MODELVIEW);
 }
 
-void
-tmotion(int x, int y)
-{
-  printf("Tablet motion x = %d, y = %d\n", x, y);
-}
+void tmotion(int x, int y) { printf("Tablet motion x = %d, y = %d\n", x, y); }
 
-void
-tbutton(int b, int s, int x, int y)
-{
+void tbutton(int b, int s, int x, int y) {
   printf("b = %d, s = %d, x = %d, y = %d\n", b, s, x, y);
 }
 
-void
-smotion(int x, int y, int z)
-{
+void smotion(int x, int y, int z) {
   fprintf(stderr, "Spaceball motion %d %d %d\n", x, y, z);
 }
 
-void
-rmotion(int x, int y, int z)
-{
+void rmotion(int x, int y, int z) {
   fprintf(stderr, "Spaceball rotate %d %d %d\n", x, y, z);
 }
 
-void
-sbutton(int button, int state)
-{
-  fprintf(stderr, "Spaceball button %d is %s\n",
-    button, state == GLUT_UP ? "up" : "down");
+void sbutton(int button, int state) {
+  fprintf(stderr, "Spaceball button %d is %s\n", button,
+          state == GLUT_UP ? "up" : "down");
 }
 
-void
-dials(int dial, int value)
-{
+void dials(int dial, int value) {
   fprintf(stderr, "Dial %d is %d\n", dial, value);
   spin = value % 360;
   glutPostRedisplay();
 }
 
-void
-buttons(int button, int state)
-{
+void buttons(int button, int state) {
   fprintf(stderr, "Button %d is %s\n", button,
-    state == GLUT_UP ? "up" : "down");
+          state == GLUT_UP ? "up" : "down");
 }
 
 /*  Main Loop
- *  Open window with initial window size, title bar, 
+ *  Open window with initial window size, title bar,
  *  RGBA display mode, and handle input events.
  */
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
   glutInitWindowSize(500, 500);
@@ -285,5 +252,5 @@ main(int argc, char **argv)
   glutAddMenuEntry("Quit", QUIT);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

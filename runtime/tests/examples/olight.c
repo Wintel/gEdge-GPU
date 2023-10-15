@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, 1994, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -60,26 +60,22 @@
 
 /* function declarations */
 
-void
-  drawScene(void), setMatrix(void), initLightAndMaterial(void),
-  animation(void), resize(int w, int h), menu(int choice), keyboard(unsigned char c, int x, int y);
+void drawScene(void), setMatrix(void), initLightAndMaterial(void),
+    animation(void), resize(int w, int h), menu(int choice),
+    keyboard(unsigned char c, int x, int y);
 
 /* global variables */
 
 float ax, ay, az;       /* angles for animation */
 GLUquadricObj *quadObj; /* used in drawscene */
-static float lmodel_twoside[] =
-{GL_TRUE};
-static float lmodel_oneside[] =
-{GL_FALSE};
+static float lmodel_twoside[] = {GL_TRUE};
+static float lmodel_oneside[] = {GL_FALSE};
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   glutInit(&argc, argv);
 
-  quadObj = gluNewQuadric();  /* this will be used in drawScene 
-                               */
+  quadObj = gluNewQuadric(); /* this will be used in drawScene
+                              */
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutCreateWindow("Two-sided lighting");
 
@@ -98,12 +94,10 @@ main(int argc, char **argv)
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   glutKeyboardFunc(keyboard);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }
 
-void
-drawScene(void)
-{
+void drawScene(void) {
   glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -113,16 +107,14 @@ drawScene(void)
   glRotatef(ax, 1.0, 0.0, 0.0);
   glRotatef(-ay, 0.0, 1.0, 0.0);
 
-  gluCylinder(quadObj, 2.0, 5.0, 10.0, 20, 8);  /* draw a cone */
+  gluCylinder(quadObj, 2.0, 5.0, 10.0, 20, 8); /* draw a cone */
 
   glPopMatrix();
 
   glutSwapBuffers();
 }
 
-void
-setMatrix(void)
-{
+void setMatrix(void) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(-15.0, 15.0, -15.0, 15.0, -10.0, 10.0);
@@ -132,9 +124,7 @@ setMatrix(void)
 
 int count = 0;
 
-void
-animation(void)
-{
+void animation(void) {
   ax += 5.0;
   ay -= 2.0;
   az += 5.0;
@@ -151,9 +141,7 @@ animation(void)
 }
 
 /* ARGSUSED1 */
-void
-keyboard(unsigned char c, int x, int y)
-{
+void keyboard(unsigned char c, int x, int y) {
   switch (c) {
   case 27:
     exit(0);
@@ -163,9 +151,7 @@ keyboard(unsigned char c, int x, int y)
   }
 }
 
-void
-menu(int choice)
-{
+void menu(int choice) {
   switch (choice) {
   case 3:
     count = 0;
@@ -184,38 +170,24 @@ menu(int choice)
   }
 }
 
-void
-resize(int w, int h)
-{
+void resize(int w, int h) {
   glViewport(0, 0, w, h);
   setMatrix();
 }
 
-void
-initLightAndMaterial(void)
-{
-  static float ambient[] =
-  {0.1, 0.1, 0.1, 1.0};
-  static float diffuse[] =
-  {0.5, 1.0, 1.0, 1.0};
-  static float position[] =
-  {90.0, 90.0, 150.0, 0.0};
+void initLightAndMaterial(void) {
+  static float ambient[] = {0.1, 0.1, 0.1, 1.0};
+  static float diffuse[] = {0.5, 1.0, 1.0, 1.0};
+  static float position[] = {90.0, 90.0, 150.0, 0.0};
 
-  static float front_mat_shininess[] =
-  {60.0};
-  static float front_mat_specular[] =
-  {0.2, 0.2, 0.2, 1.0};
-  static float front_mat_diffuse[] =
-  {0.5, 0.5, 0.28, 1.0};
-  static float back_mat_shininess[] =
-  {60.0};
-  static float back_mat_specular[] =
-  {0.5, 0.5, 0.2, 1.0};
-  static float back_mat_diffuse[] =
-  {1.0, 0.9, 0.2, 1.0};
+  static float front_mat_shininess[] = {60.0};
+  static float front_mat_specular[] = {0.2, 0.2, 0.2, 1.0};
+  static float front_mat_diffuse[] = {0.5, 0.5, 0.28, 1.0};
+  static float back_mat_shininess[] = {60.0};
+  static float back_mat_specular[] = {0.5, 0.5, 0.2, 1.0};
+  static float back_mat_diffuse[] = {1.0, 0.9, 0.2, 1.0};
 
-  static float lmodel_ambient[] =
-  {1.0, 1.0, 1.0, 1.0};
+  static float lmodel_ambient[] = {1.0, 1.0, 1.0, 1.0};
 
   setMatrix();
   glEnable(GL_DEPTH_TEST);

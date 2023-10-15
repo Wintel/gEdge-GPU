@@ -1,31 +1,26 @@
 
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
-#include <string.h>
 #include <GL/glut.h>
+#include <string.h>
 
 void *font = GLUT_STROKE_ROMAN;
-void *fonts[] =
-{GLUT_STROKE_ROMAN, GLUT_STROKE_MONO_ROMAN};
+void *fonts[] = {GLUT_STROKE_ROMAN, GLUT_STROKE_MONO_ROMAN};
 char defaultMessage[] = "GLUT means OpenGL.";
 char *message = defaultMessage;
 
 int angle = 0;
 
-void
-selectFont(int newfont)
-{
+void selectFont(int newfont) {
   font = fonts[newfont];
   glutPostRedisplay();
 }
 
-void
-selectMessage(int msg)
-{
+void selectMessage(int msg) {
   switch (msg) {
   case 1:
     message = "abcdefghijklmnop";
@@ -36,23 +31,19 @@ selectMessage(int msg)
   }
 }
 
-void
-tick(void)
-{
+void tick(void) {
   angle -= 2;
   glutPostRedisplay();
 }
 
-void
-display(void)
-{
+void display(void) {
   int len, i;
 
   glClear(GL_COLOR_BUFFER_BIT);
   glPushMatrix();
   glRotatef(angle, 0.0, 0.0, 1.0);
   glTranslatef(-750, 0, 0);
-  len = (int) strlen(message);
+  len = (int)strlen(message);
   for (i = 0; i < len; i++) {
     glutStrokeCharacter(font, message[i]);
   }
@@ -60,9 +51,7 @@ display(void)
   glutSwapBuffers();
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   int i, submenu;
 
   glutInit(&argc, argv);
@@ -96,5 +85,5 @@ main(int argc, char **argv)
   glutAddSubMenu("Messages", submenu);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

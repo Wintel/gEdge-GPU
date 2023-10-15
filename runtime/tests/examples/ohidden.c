@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, 1994, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -64,36 +64,22 @@ static int stencilOn = 1;
 
 /* function declarations */
 
-void
-  drawScene(void), setMatrix(void), animation(void), resize(int w, int h),
-  keyboard(unsigned char c, int x, int y), menu(int choice), drawWireframe(int face),
-  drawFilled(int face);
+void drawScene(void), setMatrix(void), animation(void), resize(int w, int h),
+    keyboard(unsigned char c, int x, int y), menu(int choice),
+    drawWireframe(int face), drawFilled(int face);
 
 /* global variables */
 
-float ax, ay, az;       /* angles for animation */
+float ax, ay, az; /* angles for animation */
 
 /* coords of a cube */
-static GLfloat cube[8][3] =
-{0.0, 0.0, 0.0,
-  1.0, 0.0, 0.0,
-  1.0, 0.0, 1.0,
-  0.0, 0.0, 1.0,
-  1.0, 1.0, 0.0,
-  1.0, 1.0, 1.0,
-  0.0, 1.0, 1.0,
-  0.0, 1.0, 0.0};
+static GLfloat cube[8][3] = {0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+                             1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0,
+                             1.0, 1.0, 0.0, 1.0, 1.0, 0.0, 1.0, 0.0};
 
-static int faceIndex[6][4] =
-{0, 1, 2, 3,
-  1, 4, 5, 2,
-  4, 7, 6, 5,
-  7, 0, 3, 6,
-  3, 2, 5, 6,
-  7, 4, 1, 0};
-int
-main(int argc, char **argv)
-{
+static int faceIndex[6][4] = {0, 1, 2, 3, 1, 4, 5, 2, 4, 7, 6, 5,
+                              7, 0, 3, 6, 3, 2, 5, 6, 7, 4, 1, 0};
+int main(int argc, char **argv) {
   glutInit(&argc, argv);
 
   glutInitWindowSize(400, 400);
@@ -113,32 +99,26 @@ main(int argc, char **argv)
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   glutKeyboardFunc(keyboard);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }
 
-void
-drawWireframe(int face)
-{
+void drawWireframe(int face) {
   int i;
   glBegin(GL_LINE_LOOP);
   for (i = 0; i < 4; i++)
-    glVertex3fv((GLfloat *) cube[faceIndex[face][i]]);
+    glVertex3fv((GLfloat *)cube[faceIndex[face][i]]);
   glEnd();
 }
 
-void
-drawFilled(int face)
-{
+void drawFilled(int face) {
   int i;
   glBegin(GL_POLYGON);
   for (i = 0; i < 4; i++)
-    glVertex3fv((GLfloat *) cube[faceIndex[face][i]]);
+    glVertex3fv((GLfloat *)cube[faceIndex[face][i]]);
   glEnd();
 }
 
-void
-drawScene(void)
-{
+void drawScene(void) {
 
   int i;
   glEnable(GL_DEPTH_TEST);
@@ -189,9 +169,7 @@ drawScene(void)
   glutSwapBuffers();
 }
 
-void
-setMatrix(void)
-{
+void setMatrix(void) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(-2.0, 2.0, -2.0, 2.0, -2.0, 2.0);
@@ -201,9 +179,7 @@ setMatrix(void)
 
 int count = 0;
 
-void
-animation(void)
-{
+void animation(void) {
   /* animate the cone */
 
   ax += 5.0;
@@ -221,9 +197,7 @@ animation(void)
     glutIdleFunc(NULL);
 }
 
-void
-menu(int choice)
-{
+void menu(int choice) {
   switch (choice) {
   case 3:
     count = 0;
@@ -243,9 +217,7 @@ menu(int choice)
 }
 
 /* ARGSUSED1 */
-void
-keyboard(unsigned char c, int x, int y)
-{
+void keyboard(unsigned char c, int x, int y) {
   switch (c) {
   case 27:
     exit(0);
@@ -255,9 +227,7 @@ keyboard(unsigned char c, int x, int y)
   }
 }
 
-void
-resize(int w, int h)
-{
+void resize(int w, int h) {
   glViewport(0, 0, w, h);
   setMatrix();
 }

@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -38,39 +38,28 @@
  * OpenGL(TM) is a trademark of Silicon Graphics, Inc.
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <GL/glut.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 GLenum doubleBuffer;
 /* *INDENT-OFF* */
-double plane[4] = {
-  1.0, 0.0, -1.0, 0.0
-};
+double plane[4] = {1.0, 0.0, -1.0, 0.0};
 float rotX = 5.0, rotY = -5.0, zTranslate = -65.0;
 float fogDensity = 0.02;
 GLint cubeList = 1;
 
 float scp[18][3] = {
-  {1.000000, 0.000000, 0.000000},
-  {1.000000, 0.000000, 5.000000},
-  {0.707107, 0.707107, 0.000000},
-  {0.707107, 0.707107, 5.000000},
-  {0.000000, 1.000000, 0.000000},
-  {0.000000, 1.000000, 5.000000},
-  {-0.707107, 0.707107, 0.000000},
-  {-0.707107, 0.707107, 5.000000},
-  {-1.000000, 0.000000, 0.000000},
-  {-1.000000, 0.000000, 5.000000},
-  {-0.707107, -0.707107, 0.000000},
-  {-0.707107, -0.707107, 5.000000},
-  {0.000000, -1.000000, 0.000000},
-  {0.000000, -1.000000, 5.000000},
-  {0.707107, -0.707107, 0.000000},
-  {0.707107, -0.707107, 5.000000},
-  {1.000000, 0.000000, 0.000000},
-  {1.000000, 0.000000, 5.000000},
+    {1.000000, 0.000000, 0.000000},   {1.000000, 0.000000, 5.000000},
+    {0.707107, 0.707107, 0.000000},   {0.707107, 0.707107, 5.000000},
+    {0.000000, 1.000000, 0.000000},   {0.000000, 1.000000, 5.000000},
+    {-0.707107, 0.707107, 0.000000},  {-0.707107, 0.707107, 5.000000},
+    {-1.000000, 0.000000, 0.000000},  {-1.000000, 0.000000, 5.000000},
+    {-0.707107, -0.707107, 0.000000}, {-0.707107, -0.707107, 5.000000},
+    {0.000000, -1.000000, 0.000000},  {0.000000, -1.000000, 5.000000},
+    {0.707107, -0.707107, 0.000000},  {0.707107, -0.707107, 5.000000},
+    {1.000000, 0.000000, 0.000000},   {1.000000, 0.000000, 5.000000},
 };
 
 static float ambient[] = {0.1, 0.1, 0.1, 1.0};
@@ -87,9 +76,7 @@ static float fog_color[] = {0.8, 0.8, 0.8, 1.0};
 /* *INDENT-ON* */
 
 /* ARGSUSED1 */
-static void
-Key(unsigned char key, int x, int y)
-{
+static void Key(unsigned char key, int x, int y) {
   switch (key) {
   case 'd':
     fogDensity *= 1.10;
@@ -107,9 +94,7 @@ Key(unsigned char key, int x, int y)
 }
 
 /* ARGSUSED1 */
-static void
-SpecialKey(int key, int x, int y)
-{
+static void SpecialKey(int key, int x, int y) {
   switch (key) {
   case GLUT_KEY_UP:
     rotX -= 5;
@@ -130,9 +115,7 @@ SpecialKey(int key, int x, int y)
   }
 }
 
-static void
-Draw(void)
-{
+static void Draw(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glPushMatrix();
@@ -154,9 +137,7 @@ Draw(void)
   }
 }
 
-static void
-Args(int argc, char **argv)
-{
+static void Args(int argc, char **argv) {
   GLint i;
   doubleBuffer = GL_TRUE;
 
@@ -169,9 +150,7 @@ Args(int argc, char **argv)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   GLenum type;
 
   glutInit(&argc, argv);
@@ -209,44 +188,44 @@ main(int argc, char **argv)
   glClearColor(0.8, 0.8, 0.8, 1.0);
   /* *INDENT-OFF* */
   glNewList(cubeList, GL_COMPILE);
-    glBegin(GL_TRIANGLE_STRIP);
-      glNormal3fv(scp[0]);
-      glVertex3fv(scp[0]);
-      glNormal3fv(scp[0]);
-      glVertex3fv(scp[1]);
-      glNormal3fv(scp[2]);
-      glVertex3fv(scp[2]);
-      glNormal3fv(scp[2]);
-      glVertex3fv(scp[3]);
-      glNormal3fv(scp[4]);
-      glVertex3fv(scp[4]);
-      glNormal3fv(scp[4]);
-      glVertex3fv(scp[5]);
-      glNormal3fv(scp[6]);
-      glVertex3fv(scp[6]);
-      glNormal3fv(scp[6]);
-      glVertex3fv(scp[7]);
-      glNormal3fv(scp[8]);
-      glVertex3fv(scp[8]);
-      glNormal3fv(scp[8]);
-      glVertex3fv(scp[9]);
-      glNormal3fv(scp[10]);
-      glVertex3fv(scp[10]);
-      glNormal3fv(scp[10]);
-      glVertex3fv(scp[11]);
-      glNormal3fv(scp[12]);
-      glVertex3fv(scp[12]);
-      glNormal3fv(scp[12]);
-      glVertex3fv(scp[13]);
-      glNormal3fv(scp[14]);
-      glVertex3fv(scp[14]);
-      glNormal3fv(scp[14]);
-      glVertex3fv(scp[15]);
-      glNormal3fv(scp[16]);
-      glVertex3fv(scp[16]);
-      glNormal3fv(scp[16]);
-      glVertex3fv(scp[17]);
-    glEnd();
+  glBegin(GL_TRIANGLE_STRIP);
+  glNormal3fv(scp[0]);
+  glVertex3fv(scp[0]);
+  glNormal3fv(scp[0]);
+  glVertex3fv(scp[1]);
+  glNormal3fv(scp[2]);
+  glVertex3fv(scp[2]);
+  glNormal3fv(scp[2]);
+  glVertex3fv(scp[3]);
+  glNormal3fv(scp[4]);
+  glVertex3fv(scp[4]);
+  glNormal3fv(scp[4]);
+  glVertex3fv(scp[5]);
+  glNormal3fv(scp[6]);
+  glVertex3fv(scp[6]);
+  glNormal3fv(scp[6]);
+  glVertex3fv(scp[7]);
+  glNormal3fv(scp[8]);
+  glVertex3fv(scp[8]);
+  glNormal3fv(scp[8]);
+  glVertex3fv(scp[9]);
+  glNormal3fv(scp[10]);
+  glVertex3fv(scp[10]);
+  glNormal3fv(scp[10]);
+  glVertex3fv(scp[11]);
+  glNormal3fv(scp[12]);
+  glVertex3fv(scp[12]);
+  glNormal3fv(scp[12]);
+  glVertex3fv(scp[13]);
+  glNormal3fv(scp[14]);
+  glVertex3fv(scp[14]);
+  glNormal3fv(scp[14]);
+  glVertex3fv(scp[15]);
+  glNormal3fv(scp[16]);
+  glVertex3fv(scp[16]);
+  glNormal3fv(scp[16]);
+  glVertex3fv(scp[17]);
+  glEnd();
   glEndList();
   /* *INDENT-ON* */
 
@@ -259,5 +238,5 @@ main(int argc, char **argv)
   glutSpecialFunc(SpecialKey);
   glutDisplayFunc(Draw);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }

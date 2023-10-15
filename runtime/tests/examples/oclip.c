@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, 1994, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -49,7 +49,7 @@
  *           clipping functionality, hence the rendering is kept
  *           simple (wireframe) and only one clipping plane is used.
  *
- *    press  left   button to move object 
+ *    press  left   button to move object
  *           right  button to move clipping plane
  *
  *
@@ -61,23 +61,19 @@
 
 /* function declarations */
 
-void
-  drawScene(void), setMatrix(void), animateClipPlane(void), animation(void),
-  resize(int w, int h), keyboard(unsigned char c, int x, int y);
+void drawScene(void), setMatrix(void), animateClipPlane(void), animation(void),
+    resize(int w, int h), keyboard(unsigned char c, int x, int y);
 
 /* global variables */
 
-float ax, ay, az;       /* angles for animation */
-GLUquadricObj *quadObj; /* used in drawscene */
-GLdouble planeEqn[] =
-{0.707, 0.707, 0.0, 0.0};  /* initial clipping plane eqn */
+float ax, ay, az;                               /* angles for animation */
+GLUquadricObj *quadObj;                         /* used in drawscene */
+GLdouble planeEqn[] = {0.707, 0.707, 0.0, 0.0}; /* initial clipping plane eqn */
 
 int count = 0;
 int clip_count = 0;
 
-void
-menu(int choice)
-{
+void menu(int choice) {
   switch (choice) {
   case 1:
     count = 90;
@@ -89,13 +85,11 @@ menu(int choice)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   glutInit(&argc, argv);
 
-  quadObj = gluNewQuadric();  /* this will be used in drawScene 
-                               */
+  quadObj = gluNewQuadric(); /* this will be used in drawScene
+                              */
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
   glutCreateWindow("Arbitrary clip plane");
 
@@ -111,12 +105,10 @@ main(int argc, char **argv)
   glutAddMenuEntry("Move clip plane", 2);
   glutAttachMenu(GLUT_RIGHT_BUTTON);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }
 
-void
-drawScene(void)
-{
+void drawScene(void) {
   glClearColor(0.0, 0.0, 0.0, 0.0);
   glClear(GL_COLOR_BUFFER_BIT);
 
@@ -126,11 +118,11 @@ drawScene(void)
   glRotatef(ax, 1.0, 0.0, 0.0);
   glRotatef(-ay, 0.0, 1.0, 0.0);
 
-  glClipPlane(GL_CLIP_PLANE0, planeEqn);  /* define clipping
-                                             plane */
-  glEnable(GL_CLIP_PLANE0);  /* and enable it */
+  glClipPlane(GL_CLIP_PLANE0, planeEqn); /* define clipping
+                                            plane */
+  glEnable(GL_CLIP_PLANE0);              /* and enable it */
 
-  gluCylinder(quadObj, 2.0, 5.0, 10.0, 20, 8);  /* draw a cone */
+  gluCylinder(quadObj, 2.0, 5.0, 10.0, 20, 8); /* draw a cone */
 
   glDisable(GL_CLIP_PLANE0);
   glPopMatrix();
@@ -138,9 +130,7 @@ drawScene(void)
   glutSwapBuffers();
 }
 
-void
-setMatrix(void)
-{
+void setMatrix(void) {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glOrtho(-15.0, 15.0, -15.0, 15.0, -10.0, 10.0);
@@ -148,9 +138,7 @@ setMatrix(void)
   glLoadIdentity();
 }
 
-void
-animation(void)
-{
+void animation(void) {
   if (count) {
     ax += 5.0;
     ay -= 2.0;
@@ -179,17 +167,13 @@ animation(void)
     glutIdleFunc(NULL);
 }
 
-void
-animateClipPlane(void)
-{
+void animateClipPlane(void) {
   clip_count = 5;
   glutIdleFunc(animation);
 }
 
 /* ARGSUSED1 */
-void
-keyboard(unsigned char c, int x, int y)
-{
+void keyboard(unsigned char c, int x, int y) {
   switch (c) {
   case 27:
     exit(0);
@@ -199,9 +183,7 @@ keyboard(unsigned char c, int x, int y)
   }
 }
 
-void
-resize(int w, int h)
-{
+void resize(int w, int h) {
   glViewport(0, 0, w, h);
   setMatrix();
 }

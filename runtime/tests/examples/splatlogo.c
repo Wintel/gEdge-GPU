@@ -1,13 +1,13 @@
 
 /* Copyright (c) Mark J. Kilgard, 1996. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
-#include <stdlib.h>
-#include <stdio.h>
 #include <GL/glut.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MAX_SPLATS 100
 
@@ -28,16 +28,10 @@ int numSplats = 0;
 SplatInfo splatConfig;
 SplatInfo splatList[MAX_SPLATS];
 SplatInfo splatDefault = {
-  0, 0,
-  GL_TRUE,
-  1.0, 1.0,
-  1.0, 1.0, 1.0,
-  0.0, 0.0, 0.0,
+    0, 0, GL_TRUE, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0,
 };
 
-void
-reshape(int w, int h)
-{
+void reshape(int w, int h) {
   glViewport(0, 0, w, h);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -46,32 +40,27 @@ reshape(int w, int h)
   winHeight = h;
 }
 
-void
-renderSplat(SplatInfo *splat)
-{
-    glRasterPos2i(splat->x, splat->y);
-    if(splat->yScale >= 0)
-      glBitmap(0, 0, 0, 0, 0, -logo_height * splat->yScale, 0);
-    if(splat->xScale < 0)
-      glBitmap(0, 0, 0, 0, logo_width * -splat->xScale, 0, 0);
-    glPixelZoom(splat->xScale, splat->yScale);
-    glPixelTransferf(GL_RED_SCALE, splat->scale[0]);
-    glPixelTransferf(GL_GREEN_SCALE, splat->scale[1]);
-    glPixelTransferf(GL_BLUE_SCALE, splat->scale[2]);
-    glPixelTransferf(GL_RED_BIAS, splat->bias[0]);
-    glPixelTransferf(GL_GREEN_BIAS, splat->bias[1]);
-    glPixelTransferf(GL_BLUE_BIAS, splat->bias[2]);
-    if (splat->alphaTest) 
-      glEnable(GL_ALPHA_TEST);
-    else
-      glDisable(GL_ALPHA_TEST);
-    glDrawPixels(logo_width, logo_height, GL_RGBA,
-      GL_UNSIGNED_BYTE, logo_image);
+void renderSplat(SplatInfo *splat) {
+  glRasterPos2i(splat->x, splat->y);
+  if (splat->yScale >= 0)
+    glBitmap(0, 0, 0, 0, 0, -logo_height * splat->yScale, 0);
+  if (splat->xScale < 0)
+    glBitmap(0, 0, 0, 0, logo_width * -splat->xScale, 0, 0);
+  glPixelZoom(splat->xScale, splat->yScale);
+  glPixelTransferf(GL_RED_SCALE, splat->scale[0]);
+  glPixelTransferf(GL_GREEN_SCALE, splat->scale[1]);
+  glPixelTransferf(GL_BLUE_SCALE, splat->scale[2]);
+  glPixelTransferf(GL_RED_BIAS, splat->bias[0]);
+  glPixelTransferf(GL_GREEN_BIAS, splat->bias[1]);
+  glPixelTransferf(GL_BLUE_BIAS, splat->bias[2]);
+  if (splat->alphaTest)
+    glEnable(GL_ALPHA_TEST);
+  else
+    glDisable(GL_ALPHA_TEST);
+  glDrawPixels(logo_width, logo_height, GL_RGBA, GL_UNSIGNED_BYTE, logo_image);
 }
 
-void
-display(void)
-{
+void display(void) {
   int i;
 
   glClear(GL_COLOR_BUFFER_BIT);
@@ -80,15 +69,13 @@ display(void)
   }
 }
 
-void
-mouse(int button, int state, int x, int y)
-{
+void mouse(int button, int state, int x, int y) {
   if (button == GLUT_LEFT_BUTTON) {
     if (state == GLUT_DOWN) {
       if (numSplats < MAX_SPLATS) {
         splatConfig.x = x;
         splatConfig.y = winHeight - y;
-	renderSplat(&splatConfig);
+        renderSplat(&splatConfig);
         splatList[numSplats] = splatConfig;
         numSplats++;
       } else {
@@ -98,13 +85,11 @@ mouse(int button, int state, int x, int y)
   }
 }
 
-void
-mainSelect(int value)
-{
+void mainSelect(int value) {
   GLfloat rpos[4];
   GLboolean valid;
 
-  switch(value) {
+  switch (value) {
   case 0:
     numSplats = 0;
     glutPostRedisplay();
@@ -135,8 +120,8 @@ mainSelect(int value)
   case 411:
     glGetFloatv(GL_CURRENT_RASTER_POSITION, rpos);
     glGetBooleanv(GL_CURRENT_RASTER_POSITION_VALID, &valid);
-    printf("Raster position (%g,%g) is %s\n",
-      rpos[0], rpos[1], valid ? "valid" : "INVALID");
+    printf("Raster position (%g,%g) is %s\n", rpos[0], rpos[1],
+           valid ? "valid" : "INVALID");
     break;
   case 666:
     exit(0);
@@ -144,13 +129,11 @@ mainSelect(int value)
   }
 }
 
-void
-scaleBiasSelect(int value)
-{
+void scaleBiasSelect(int value) {
   int color = value >> 4;
   int option = value & 0xf;
 
-  switch(option) {
+  switch (option) {
   case 1:
     splatConfig.bias[color] += 0.25;
     break;
@@ -166,9 +149,7 @@ scaleBiasSelect(int value)
   }
 }
 
-int
-glutScaleBiasMenu(int mask)
-{
+int glutScaleBiasMenu(int mask) {
   int menu;
 
   menu = glutCreateMenu(scaleBiasSelect);
@@ -179,9 +160,7 @@ glutScaleBiasMenu(int mask)
   return menu;
 }
 
-int
-main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   int mainMenu, redMenu, greenMenu, blueMenu;
 
   glutInitWindowSize(680, 440);

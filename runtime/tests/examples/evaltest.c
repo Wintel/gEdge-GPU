@@ -1,18 +1,18 @@
 
 /* Copyright (c) Mark J. Kilgard, 1996. */
 
-/* This program is freely distributable without licensing fees 
-   and is provided without guarantee or warrantee expressed or 
+/* This program is freely distributable without licensing fees
+   and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
 
 /* This program was originally written by someone else (Simon Hui?);
    I just added a bit more GLUT stuff to it. */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
 #include <GL/glut.h>
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define VORDER 10
 #define CORDER 10
@@ -49,100 +49,50 @@ GLenum lighting = GL_FALSE;
 GLenum mapPoint = GL_FALSE;
 GLenum mapType = EVAL;
 
-double point1[10 * 4] =
-{
-  -0.5, 0.0, 0.0, 1.0,
-  -0.4, 0.5, 0.0, 1.0,
-  -0.3, -0.5, 0.0, 1.0,
-  -0.2, 0.5, 0.0, 1.0,
-  -0.1, -0.5, 0.0, 1.0,
-  0.0, 0.5, 0.0, 1.0,
-  0.1, -0.5, 0.0, 1.0,
-  0.2, 0.5, 0.0, 1.0,
-  0.3, -0.5, 0.0, 1.0,
-  0.4, 0.0, 0.0, 1.0,
+double point1[10 * 4] = {
+    -0.5, 0.0, 0.0,  1.0,  -0.4, 0.5,  0.0,  1.0,  -0.3, -0.5,
+    0.0,  1.0, -0.2, 0.5,  0.0,  1.0,  -0.1, -0.5, 0.0,  1.0,
+    0.0,  0.5, 0.0,  1.0,  0.1,  -0.5, 0.0,  1.0,  0.2,  0.5,
+    0.0,  1.0, 0.3,  -0.5, 0.0,  1.0,  0.4,  0.0,  0.0,  1.0,
 };
-double cpoint1[10 * 4] =
-{
-  0.0, 0.0, 1.0, 1.0,
-  0.3, 0.0, 0.7, 1.0,
-  0.6, 0.0, 0.3, 1.0,
-  1.0, 0.0, 0.0, 1.0,
-  1.0, 0.3, 0.0, 1.0,
-  1.0, 0.6, 0.0, 1.0,
-  1.0, 1.0, 0.0, 1.0,
-  1.0, 1.0, 0.5, 1.0,
-  1.0, 1.0, 1.0, 1.0,
+double cpoint1[10 * 4] = {
+    0.0, 0.0, 1.0, 1.0, 0.3, 0.0, 0.7, 1.0, 0.6, 0.0, 0.3, 1.0,
+    1.0, 0.0, 0.0, 1.0, 1.0, 0.3, 0.0, 1.0, 1.0, 0.6, 0.0, 1.0,
+    1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.5, 1.0, 1.0, 1.0, 1.0, 1.0,
 };
-double tpoint1[11 * 4] =
-{
-  0.0, 0.0, 0.0, 1.0,
-  0.0, 0.1, 0.0, 1.0,
-  0.0, 0.2, 0.0, 1.0,
-  0.0, 0.3, 0.0, 1.0,
-  0.0, 0.4, 0.0, 1.0,
-  0.0, 0.5, 0.0, 1.0,
-  0.0, 0.6, 0.0, 1.0,
-  0.0, 0.7, 0.0, 1.0,
-  0.0, 0.8, 0.0, 1.0,
-  0.0, 0.9, 0.0, 1.0,
+double tpoint1[11 * 4] = {
+    0.0, 0.0, 0.0, 1.0, 0.0, 0.1, 0.0, 1.0, 0.0, 0.2, 0.0, 1.0, 0.0, 0.3,
+    0.0, 1.0, 0.0, 0.4, 0.0, 1.0, 0.0, 0.5, 0.0, 1.0, 0.0, 0.6, 0.0, 1.0,
+    0.0, 0.7, 0.0, 1.0, 0.0, 0.8, 0.0, 1.0, 0.0, 0.9, 0.0, 1.0,
 };
-double point2[2 * 3 * 4] =
-{
-  -0.5, -0.5, 0.5, 1.0,
-  0.0, 1.0, 0.5, 1.0,
-  0.5, -0.5, 0.5, 1.0,
-  -0.5, 0.5, -0.5, 1.0,
-  0.0, -1.0, -0.5, 1.0,
-  0.5, 0.5, -0.5, 1.0,
+double point2[2 * 3 * 4] = {
+    -0.5, -0.5, 0.5,  1.0, 0.0, 1.0,  0.5,  1.0, 0.5, -0.5, 0.5,  1.0,
+    -0.5, 0.5,  -0.5, 1.0, 0.0, -1.0, -0.5, 1.0, 0.5, 0.5,  -0.5, 1.0,
 };
-double cpoint2[2 * 2 * 4] =
-{
-  0.0, 0.0, 0.0, 1.0,
-  0.0, 0.0, 1.0, 1.0,
-  0.0, 1.0, 0.0, 1.0,
-  1.0, 1.0, 1.0, 1.0,
+double cpoint2[2 * 2 * 4] = {
+    0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0,
+    0.0, 1.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 };
-double tpoint2[2 * 2 * 2] =
-{
-  0.0, 0.0, 0.0, 1.0,
-  1.0, 0.0, 1.0, 1.0,
+double tpoint2[2 * 2 * 2] = {
+    0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0,
 };
-float textureImage[4 * 2 * 4] =
-{
-  1.0, 1.0, 1.0, 1.0,
-  1.0, 0.0, 0.0, 1.0,
-  1.0, 0.0, 0.0, 1.0,
-  1.0, 1.0, 1.0, 1.0,
-  1.0, 1.0, 1.0, 1.0,
-  1.0, 0.0, 0.0, 1.0,
-  1.0, 0.0, 0.0, 1.0,
-  1.0, 1.0, 1.0, 1.0,
+float textureImage[4 * 2 * 4] = {
+    1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0,
+    1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0,
+    0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0,
 };
 
-static void
-Init(void)
-{
-  static float ambient[] =
-  {0.1, 0.1, 0.1, 1.0};
-  static float diffuse[] =
-  {1.0, 1.0, 1.0, 1.0};
-  static float position[] =
-  {0.0, 0.0, -150.0, 0.0};
-  static float front_mat_diffuse[] =
-  {1.0, 0.2, 1.0, 1.0};
-  static float back_mat_diffuse[] =
-  {1.0, 1.0, 0.2, 1.0};
-  static float lmodel_ambient[] =
-  {1.0, 1.0, 1.0, 1.0};
-  static float lmodel_twoside[] =
-  {GL_TRUE};
-  static float decal[] =
-  {GL_DECAL};
-  static float repeat[] =
-  {GL_REPEAT};
-  static float nr[] =
-  {GL_NEAREST};
+static void Init(void) {
+  static float ambient[] = {0.1, 0.1, 0.1, 1.0};
+  static float diffuse[] = {1.0, 1.0, 1.0, 1.0};
+  static float position[] = {0.0, 0.0, -150.0, 0.0};
+  static float front_mat_diffuse[] = {1.0, 0.2, 1.0, 1.0};
+  static float back_mat_diffuse[] = {1.0, 1.0, 0.2, 1.0};
+  static float lmodel_ambient[] = {1.0, 1.0, 1.0, 1.0};
+  static float lmodel_twoside[] = {GL_TRUE};
+  static float decal[] = {GL_DECAL};
+  static float repeat[] = {GL_REPEAT};
+  static float nr[] = {GL_NEAREST};
 
   glFrontFace(GL_CCW);
 
@@ -152,11 +102,11 @@ Init(void)
   glMap1d(GL_MAP1_COLOR_4, 0.0, 1.0, CDIM, CORDER, cpoint1);
 
   glMap2d(GL_MAP2_VERTEX_4, 0.0, 1.0, VMINOR_ORDER * VDIM, VMAJOR_ORDER, 0.0,
-    1.0, VDIM, VMINOR_ORDER, point2);
+          1.0, VDIM, VMINOR_ORDER, point2);
   glMap2d(GL_MAP2_COLOR_4, 0.0, 1.0, CMINOR_ORDER * CDIM, CMAJOR_ORDER, 0.0,
-    1.0, CDIM, CMINOR_ORDER, cpoint2);
-  glMap2d(GL_MAP2_TEXTURE_COORD_2, 0.0, 1.0, TMINOR_ORDER * TDIM,
-    TMAJOR_ORDER, 0.0, 1.0, TDIM, TMINOR_ORDER, tpoint2);
+          1.0, CDIM, CMINOR_ORDER, cpoint2);
+  glMap2d(GL_MAP2_TEXTURE_COORD_2, 0.0, 1.0, TMINOR_ORDER * TDIM, TMAJOR_ORDER,
+          0.0, 1.0, TDIM, TMINOR_ORDER, tpoint2);
 
   glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
   glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
@@ -174,12 +124,10 @@ Init(void)
   glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, nr);
   glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, nr);
   glTexImage2D(GL_TEXTURE_2D, 0, 4, 2, 4, 0, GL_RGBA, GL_FLOAT,
-    (GLvoid *) textureImage);
+               (GLvoid *)textureImage);
 }
 
-static void
-DrawPoints1(void)
-{
+static void DrawPoints1(void) {
   GLint i;
 
   glColor3f(0.0, 1.0, 0.0);
@@ -191,9 +139,7 @@ DrawPoints1(void)
   glEnd();
 }
 
-static void
-DrawPoints2(void)
-{
+static void DrawPoints2(void) {
   GLint i, j;
 
   glColor3f(1.0, 0.0, 1.0);
@@ -207,9 +153,7 @@ DrawPoints2(void)
   glEnd();
 }
 
-static void
-DrawMapEval1(float du)
-{
+static void DrawMapEval1(float du) {
   float u;
 
   glColor3f(1.0, 0.0, 0.0);
@@ -221,9 +165,7 @@ DrawMapEval1(float du)
   glEnd();
 }
 
-static void
-DrawMapEval2(float du, float dv)
-{
+static void DrawMapEval2(float du, float dv) {
   float u, v, tmp;
 
   glColor3f(1.0, 0.0, 0.0);
@@ -240,9 +182,7 @@ DrawMapEval2(float du, float dv)
   }
 }
 
-static void
-RenderEval(void)
-{
+static void RenderEval(void) {
 
   if (colorType) {
     glEnable(GL_MAP1_COLOR_4);
@@ -320,9 +260,7 @@ RenderEval(void)
   }
 }
 
-static void
-Reshape(int width, int height)
-{
+static void Reshape(int width, int height) {
 
   glViewport(0, 0, width, height);
 
@@ -333,9 +271,7 @@ Reshape(int width, int height)
 }
 
 /* ARGSUSED1 */
-static void
-Key(unsigned char key, int x, int y)
-{
+static void Key(unsigned char key, int x, int y) {
   switch (key) {
   case '1':
     arrayType = ONE_D;
@@ -388,23 +324,19 @@ Key(unsigned char key, int x, int y)
     }
     glutPostRedisplay();
     break;
-  case 27:             /* Escape key. */
+  case 27: /* Escape key. */
     exit(0);
   }
 }
 
-static void
-Menu(int value)
-{
+static void Menu(int value) {
   /* Menu items have key values assigned to them.  Just pass
      this value to the key routine. */
   Key(value, 0, 0);
 }
 
 /* ARGSUSED1 */
-static void
-SpecialKey(int key, int x, int y)
-{
+static void SpecialKey(int key, int x, int y) {
 
   switch (key) {
   case GLUT_KEY_LEFT:
@@ -426,9 +358,7 @@ SpecialKey(int key, int x, int y)
   }
 }
 
-static void
-Draw(void)
-{
+static void Draw(void) {
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -448,9 +378,7 @@ Draw(void)
   }
 }
 
-static void
-Args(int argc, char **argv)
-{
+static void Args(int argc, char **argv) {
   GLint i;
 
   doubleBuffer = GL_FALSE;
@@ -464,9 +392,7 @@ Args(int argc, char **argv)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   GLenum type;
 
   glutInit(&argc, argv);

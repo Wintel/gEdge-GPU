@@ -3,14 +3,14 @@
 
 /**
  * (c) Copyright 1993, Silicon Graphics, Inc.
- * ALL RIGHTS RESERVED 
- * Permission to use, copy, modify, and distribute this software for 
+ * ALL RIGHTS RESERVED
+ * Permission to use, copy, modify, and distribute this software for
  * any purpose and without fee is hereby granted, provided that the above
  * copyright notice appear in all copies and that both the copyright notice
- * and this permission notice appear in supporting documentation, and that 
+ * and this permission notice appear in supporting documentation, and that
  * the name of Silicon Graphics, Inc. not be used in advertising
  * or publicity pertaining to distribution of the software without specific,
- * written prior permission. 
+ * written prior permission.
  *
  * THE MATERIAL EMBODIED ON THIS SOFTWARE IS PROVIDED TO YOU "AS-IS"
  * AND WITHOUT WARRANTY OF ANY KIND, EXPRESS, IMPLIED OR OTHERWISE,
@@ -24,8 +24,8 @@
  * ADVISED OF THE POSSIBILITY OF SUCH LOSS, HOWEVER CAUSED AND ON
  * ANY THEORY OF LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE
  * POSSESSION, USE OR PERFORMANCE OF THIS SOFTWARE.
- * 
- * US Government Users Restricted Rights 
+ *
+ * US Government Users Restricted Rights
  * Use, duplication, or disclosure by the Government is subject to
  * restrictions set forth in FAR 52.227.19(c)(2) or subparagraph
  * (c)(1)(ii) of the Rights in Technical Data and Computer Software
@@ -38,19 +38,19 @@
  * OpenGL(TM) is a trademark of Silicon Graphics, Inc.
  */
 
+#include <GL/glut.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
 #include <time.h>
-#include <GL/glut.h>
 
 #define MAXOBJS 10000
 #define MAXSELECT 100
 #define MAXFEED 300
-#define	SOLID 1
-#define	LINE 2
-#define	POINT 3
+#define SOLID 1
+#define LINE 2
+#define POINT 3
 
 GLint windW = 300, windH = 300;
 
@@ -69,9 +69,7 @@ struct object {
 } objects[MAXOBJS];
 GLenum linePoly = GL_FALSE;
 
-static void
-InitObjects(GLint num)
-{
+static void InitObjects(GLint num) {
   GLint i;
   float x, y;
 
@@ -83,7 +81,7 @@ InitObjects(GLint num)
   }
   objectCount = num;
 
-  srand((unsigned int) time(NULL));
+  srand((unsigned int)time(NULL));
   for (i = 0; i < num; i++) {
     x = (rand() % 300) - 150;
     y = (rand() % 300) - 150;
@@ -100,25 +98,19 @@ InitObjects(GLint num)
   }
 }
 
-static void
-Init(void)
-{
+static void Init(void) {
   numObjects = 10;
   InitObjects(numObjects);
 }
 
-static void
-Reshape(int width, int height)
-{
+static void Reshape(int width, int height) {
   windW = width;
   windH = height;
   glViewport(0, 0, windW, windH);
   glGetIntegerv(GL_VIEWPORT, vp);
 }
 
-static void
-Render(GLenum mode)
-{
+static void Render(GLenum mode) {
   GLint i;
 
   for (i = 0; i < objectCount; i++) {
@@ -134,9 +126,7 @@ Render(GLenum mode)
   }
 }
 
-static GLint
-DoSelect(GLint x, GLint y)
-{
+static GLint DoSelect(GLint x, GLint y) {
   GLint hits;
 
   glSelectBuffer(MAXSELECT, selectBuf);
@@ -169,24 +159,18 @@ DoSelect(GLint x, GLint y)
   return selectBuf[(hits - 1) * 4 + 3];
 }
 
-static void
-RecolorTri(GLint h)
-{
+static void RecolorTri(GLint h) {
   objects[h].color[0] = ((rand() % 100) + 50) / 150.0;
   objects[h].color[1] = ((rand() % 100) + 50) / 150.0;
   objects[h].color[2] = ((rand() % 100) + 50) / 150.0;
 }
 
-static void
-DeleteTri(GLint h)
-{
+static void DeleteTri(GLint h) {
   objects[h] = objects[objectCount - 1];
   objectCount--;
 }
 
-static void
-GrowTri(GLint h)
-{
+static void GrowTri(GLint h) {
   float v[2];
   float *oldV;
   GLint i;
@@ -213,13 +197,11 @@ GrowTri(GLint h)
   }
 }
 
-static void
-Mouse(int button, int state, int mouseX, int mouseY)
-{
+static void Mouse(int button, int state, int mouseX, int mouseY) {
   GLint hit;
 
   if (state == GLUT_DOWN) {
-    hit = DoSelect((GLint) mouseX, (GLint) mouseY);
+    hit = DoSelect((GLint)mouseX, (GLint)mouseY);
     if (hit != -1) {
       if (button == GLUT_LEFT_BUTTON) {
         RecolorTri(hit);
@@ -233,9 +215,7 @@ Mouse(int button, int state, int mouseX, int mouseY)
   }
 }
 
-static void
-Draw(void)
-{
+static void Draw(void) {
   glPushMatrix();
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -250,9 +230,7 @@ Draw(void)
   glutSwapBuffers();
 }
 
-static void
-DumpFeedbackVert(GLint * i, GLint n)
-{
+static void DumpFeedbackVert(GLint *i, GLint n) {
   GLint index;
 
   index = *i;
@@ -261,31 +239,25 @@ DumpFeedbackVert(GLint * i, GLint n)
     printf("  ???\n");
     return;
   }
-  printf("  (%g %g %g), color = (%4.2f %4.2f %4.2f)\n",
-    feedBuf[index],
-    feedBuf[index + 1],
-    feedBuf[index + 2],
-    feedBuf[index + 3],
-    feedBuf[index + 4],
-    feedBuf[index + 5]);
+  printf("  (%g %g %g), color = (%4.2f %4.2f %4.2f)\n", feedBuf[index],
+         feedBuf[index + 1], feedBuf[index + 2], feedBuf[index + 3],
+         feedBuf[index + 4], feedBuf[index + 5]);
   index += 7;
   *i = index;
 }
 
-static void
-DrawFeedback(GLint n)
-{
+static void DrawFeedback(GLint n) {
   GLint i;
   GLint verts;
 
   printf("Feedback results (%d floats):\n", n);
   for (i = 0; i < n; i++) {
-    switch ((GLint) feedBuf[i]) {
+    switch ((GLint)feedBuf[i]) {
     case GL_POLYGON_TOKEN:
       printf("Polygon");
       i++;
       if (i < n) {
-        verts = (GLint) feedBuf[i];
+        verts = (GLint)feedBuf[i];
         i++;
         printf(": %d vertices", verts);
       } else {
@@ -323,13 +295,11 @@ DrawFeedback(GLint n)
   printf("\n");
 }
 
-static void
-DoFeedback(void)
-{
+static void DoFeedback(void) {
   GLint x;
 
   glFeedbackBuffer(MAXFEED, GL_3D_COLOR, feedBuf);
-  (void) glRenderMode(GL_FEEDBACK);
+  (void)glRenderMode(GL_FEEDBACK);
 
   glPushMatrix();
 
@@ -352,13 +322,11 @@ DoFeedback(void)
   if (x == -1) {
     x = MAXFEED;
   }
-  DrawFeedback((GLint) x);
+  DrawFeedback((GLint)x);
 }
 
 /* ARGSUSED1 */
-static void
-Key(unsigned char key, int x, int y)
-{
+static void Key(unsigned char key, int x, int y) {
 
   switch (key) {
   case 'z':
@@ -388,9 +356,7 @@ Key(unsigned char key, int x, int y)
 }
 
 /* ARGSUSED1 */
-static void
-SpecialKey(int key, int x, int y)
-{
+static void SpecialKey(int key, int x, int y) {
 
   switch (key) {
   case GLUT_KEY_LEFT:
@@ -404,9 +370,7 @@ SpecialKey(int key, int x, int y)
   }
 }
 
-int
-main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   glutInit(&argc, argv);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
   glutCreateWindow("Select Test");
@@ -417,5 +381,5 @@ main(int argc, char **argv)
   glutMouseFunc(Mouse);
   glutDisplayFunc(Draw);
   glutMainLoop();
-  return 0;             /* ANSI C requires main to return int. */
+  return 0; /* ANSI C requires main to return int. */
 }
